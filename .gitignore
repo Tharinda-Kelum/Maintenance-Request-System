@@ -1,0 +1,6 @@
+node_modules/
+.env
+
+# Real database credentials — never commit this file.
+# Each teammate creates their own local copy from db.config.example.json
+config/db.config.json
