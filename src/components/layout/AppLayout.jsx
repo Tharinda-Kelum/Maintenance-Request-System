@@ -7,7 +7,6 @@ import { useTheme } from '../../context/ThemeContext';
 export const AppLayout = ({
   activeTab,
   onSelectTab,
-  breadcrumb = [],
   onSelectTicket,
   children
 }) => {
@@ -41,7 +40,6 @@ export const AppLayout = ({
         activeTab={activeTab}
         onSelectTab={onSelectTab}
         onOpenSearch={() => setIsSearchOpen(true)}
-        onOpenNewRequest={() => onSelectTab('create_request')}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
@@ -55,7 +53,6 @@ export const AppLayout = ({
               onSelectTab(tab);
               setIsSidebarOpen(false);
             }}
-            isCollapsed={false}
             onToggleCollapse={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         )}

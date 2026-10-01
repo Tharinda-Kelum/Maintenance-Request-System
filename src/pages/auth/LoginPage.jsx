@@ -1,27 +1,31 @@
 import React, { useState } from 'react';
-import { Shield, Lock, Mail, ArrowRight, CheckCircle2, Building, Moon, Sun } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight, CheckCircle2, Building, Moon, Sun, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { UNIVERSITY_INFO, USER_ROLES } from '../../data/mockData';
+import { UNIVERSITY_INFO } from '../../data/mockData';
+import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 
 export const LoginPage = ({ onLoginSuccess }) => {
   const { login } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-  const [email, setEmail] = useState('k.sivalingam@vau.ac.lk');
-  const [password, setPassword] = useState('demo-password');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [selectedRole, setSelectedRole] = useState('general_user');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(selectedRole);
-    if (onLoginSuccess) onLoginSuccess();
-  };
+    setError('');
+    setIsSubmitting(true);
 
-  const handleQuickRoleSelect = (roleKey) => {
-    const role = USER_ROLES[roleKey];
-    setSelectedRole(role.id);
-    setEmail(role.defaultUser.email);
+    try {
+      const session = await login({ username, password });
+      if (onLoginSuccess) onLoginSuccess(session.roleId);
+    } catch (loginError) {
+      setError(loginError.message || 'Unable to sign in. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,16 +39,15 @@ export const LoginPage = ({ onLoginSuccess }) => {
         {/* Top: University Header */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-              UoV
-            </div>
+            <img
+              src={universityLogo}
+              alt="University of Vavuniya logo"
+              className="w-12 h-12 object-contain flex-shrink-0"
+            />
             <div>
               <h2 className="text-sm font-bold tracking-tight uppercase">
                 {UNIVERSITY_INFO.name}
               </h2>
-              <p className="text-xs text-blue-200">
-                {UNIVERSITY_INFO.subName}
-              </p>
             </div>
           </div>
 
@@ -79,8 +82,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
         </div>
 
         {/* Bottom: Institutional Note */}
-        <div className="relative z-10 pt-6 border-t border-white/10 text-xs text-slate-400 flex items-center justify-between">
-          <span>{UNIVERSITY_INFO.campus}</span>
+        <div className="relative z-10 pt-6 border-t border-white/10 text-xs text-slate-400 flex items-center justify-end">
           <span className="font-mono text-[11px] text-blue-300">{UNIVERSITY_INFO.systemCode}</span>
         </div>
       </div>
@@ -106,50 +108,21 @@ export const LoginPage = ({ onLoginSuccess }) => {
           </p>
         </div>
 
-        {/* Demo Persona Fast Selection Bar */}
-        <div className="mb-6 p-3.5 rounded-xl bg-slate-100/80 border border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Quick 1-Click Role Login:
-            </span>
-            <span className="text-[10px] text-slate-400">Select any role to test</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {Object.keys(USER_ROLES).map((key) => {
-              const role = USER_ROLES[key];
-              const isSelected = selectedRole === role.id;
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => handleQuickRoleSelect(key)}
-                  className={`text-[11px] px-2 py-1.5 rounded-lg border text-left truncate transition-all ${
-                    isSelected
-                      ? 'bg-brand-blue text-white border-brand-blue font-semibold shadow-xs'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {role.label.split('/')[0]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-brand-text mb-1.5">
-              Institutional Email
+              Username
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@vau.ac.lk"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 className="w-full pl-10 pr-4 py-2.5 text-xs text-brand-text bg-white border border-brand-border rounded-input outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 transition-all font-mono"
               />
             </div>
@@ -160,15 +133,13 @@ export const LoginPage = ({ onLoginSuccess }) => {
               <label className="block text-xs font-semibold text-brand-text">
                 Password
               </label>
-              <a href="#forgot" className="text-xs text-brand-blue hover:underline">
-                Forgot password?
-              </a>
             </div>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
@@ -177,24 +148,19 @@ export const LoginPage = ({ onLoginSuccess }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
-              />
-              <span>Remember this workstation</span>
-            </label>
-            <span className="text-[11px] text-slate-400">Campus SSO v2.4</span>
-          </div>
+          {error && (
+            <div role="alert" className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full py-2.5 px-4 bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-semibold rounded-input shadow-sm transition-all flex items-center justify-center gap-2"
           >
-            <span>Sign In to Maintenance System</span>
+            <span>{isSubmitting ? 'Signing In...' : 'Sign In to Maintenance System'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
@@ -209,17 +175,10 @@ export const LoginPage = ({ onLoginSuccess }) => {
           </span>
         </div>
 
-        {/* SSO Button Placeholder */}
-        <button
-          type="button"
-          onClick={() => {
-            login(selectedRole);
-            if (onLoginSuccess) onLoginSuccess();
-          }}
-          className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-input border border-slate-300 shadow-xs transition-colors flex items-center justify-center gap-2"
-        >
+        {/* SSO placeholder: intentionally disabled until the backend integration is ready. */}
+        <button type="button" disabled className="w-full py-2.5 px-4 bg-white text-slate-400 text-xs font-semibold rounded-input border border-slate-200 flex items-center justify-center gap-2 cursor-not-allowed">
           <Shield className="w-3.5 h-3.5 text-brand-navy" />
-          <span>Sign In with University LDAP / Google Workspace</span>
+          <span>University SSO (available after backend connection)</span>
         </button>
 
         {/* Security Footer Notice */}

@@ -5,6 +5,7 @@ import { InventoryProvider } from './context/InventoryContext';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
+import { canAccessTab, getRoleHome } from './auth/accessControl';
 
 // Auth Pages
 import { LoginPage } from './pages/auth/LoginPage';
@@ -47,112 +48,39 @@ import { NotFoundPage, UnauthorizedPage } from './pages/errors/NotFoundPage';
 const MainApp = () => {
   const { isAuthenticated, activeRoleId } = useAuth();
 
-  // Default starting tab based on active role
-  const getDefaultTab = () => {
-    switch (activeRoleId) {
-      case 'dept_admin':
-        return 'dashboard';
-      case 'technician':
-        return 'technician_dashboard';
-      case 'store_keeper':
-        return 'inventory_dashboard';
-      case 'super_admin':
-        return 'superadmin_dashboard';
-      case 'general_user':
-      default:
-        return 'staff_dashboard';
-    }
-  };
-
-  const [activeTab, setActiveTab] = useState(getDefaultTab());
+  const [activeTab, setActiveTab] = useState('staff_dashboard');
   const [selectedTicketId, setSelectedTicketId] = useState('MRS-2026-0148');
 
-  // If role changes, ensure tab is appropriate if needed
-  React.useEffect(() => {
-    setActiveTab(getDefaultTab());
-  }, [activeRoleId]);
-
   if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={() => setActiveTab(getDefaultTab())} />;
+    return <LoginPage onLoginSuccess={(roleId) => setActiveTab(getRoleHome(roleId))} />;
   }
+
+  const navigateTo = (tabId) => {
+    setActiveTab(canAccessTab(activeRoleId, tabId) ? tabId : '__unauthorized__');
+  };
 
   const handleSelectTicket = (ticketId) => {
     setSelectedTicketId(ticketId);
-    setActiveTab('request_detail');
+    navigateTo('request_detail');
   };
 
   const handleOpenWorkspace = (ticketId) => {
     setSelectedTicketId(ticketId);
-    setActiveTab('field_workspace');
-  };
-
-  // Generate dynamic breadcrumbs
-  const getBreadcrumbs = () => {
-    const defaultCrumb = [{ label: 'Dashboard', onClick: () => setActiveTab(getDefaultTab()) }];
-
-    switch (activeTab) {
-      case 'staff_dashboard':
-      case 'dashboard':
-      case 'technician_dashboard':
-      case 'inventory_dashboard':
-      case 'superadmin_dashboard':
-        return [{ label: 'Overview' }];
-      case 'my_requests':
-      case 'requests':
-        return [...defaultCrumb, { label: 'Requests' }];
-      case 'create_request':
-        return [...defaultCrumb, { label: 'New Request' }];
-      case 'request_detail':
-        return [
-          ...defaultCrumb,
-          { label: 'Requests', onClick: () => setActiveTab('requests') },
-          { label: selectedTicketId }
-        ];
-      case 'review_queue':
-        return [...defaultCrumb, { label: 'Verification Queue' }];
-      case 'field_workspace':
-        return [
-          ...defaultCrumb,
-          { label: 'Tasks', onClick: () => setActiveTab('technician_dashboard') },
-          { label: `Workspace (${selectedTicketId})` }
-        ];
-      case 'inventory_items':
-      case 'item_requests':
-      case 'transactions':
-        return [...defaultCrumb, { label: 'Inventory Stores' }];
-      case 'reports':
-        return [...defaultCrumb, { label: 'Reports & Analytics' }];
-      case 'users':
-        return [...defaultCrumb, { label: 'User Directory' }];
-      case 'permissions':
-        return [...defaultCrumb, { label: 'Permissions Matrix' }];
-      case 'locations':
-      case 'campus_info':
-        return [...defaultCrumb, { label: 'Campus Locations' }];
-      case 'workflow':
-      case 'categories':
-        return [...defaultCrumb, { label: 'Workflow & SLAs' }];
-      case 'audit_logs':
-        return [...defaultCrumb, { label: 'Security Audit Logs' }];
-      case 'settings':
-        return [...defaultCrumb, { label: 'System Settings' }];
-      case 'notifications':
-        return [...defaultCrumb, { label: 'Notifications' }];
-      case 'profile':
-        return [...defaultCrumb, { label: 'User Profile' }];
-      default:
-        return defaultCrumb;
-    }
+    navigateTo('field_workspace');
   };
 
   // Render main screen component
   const renderCurrentView = () => {
+    if (!canAccessTab(activeRoleId, activeTab)) {
+      return <UnauthorizedPage onGoHome={() => navigateTo(getRoleHome(activeRoleId))} />;
+    }
+
     switch (activeTab) {
       // Staff Views
       case 'staff_dashboard':
         return (
           <StaffDashboard
-            onNavigate={setActiveTab}
+            onNavigate={navigateTo}
             onSelectTicket={handleSelectTicket}
           />
         );
@@ -160,7 +88,7 @@ const MainApp = () => {
       case 'create_request':
         return (
           <CreateRequestPage
-            onNavigate={setActiveTab}
+            onNavigate={navigateTo}
             onSelectTicket={handleSelectTicket}
           />
         );
@@ -169,7 +97,7 @@ const MainApp = () => {
       case 'requests':
         return (
           <MyRequestsPage
-            onNavigate={setActiveTab}
+            onNavigate={navigateTo}
             onSelectTicket={handleSelectTicket}
           />
         );
@@ -178,12 +106,12 @@ const MainApp = () => {
         return (
           <RequestDetailPage
             ticketId={selectedTicketId}
-            onBack={() => setActiveTab('requests')}
-            onOpenAssign={(ticket) => {
+            onBack={() => navigateTo('requests')}
+            onOpenAssign={() => {
               // open assign modal
             }}
-            onOpenReview={(ticket) => {
-              setActiveTab('review_queue');
+            onOpenReview={() => {
+              navigateTo('review_queue');
             }}
           />
         );
@@ -193,7 +121,7 @@ const MainApp = () => {
       case 'review_queue':
         return (
           <DeptAdminDashboard
-            onNavigate={setActiveTab}
+            onNavigate={navigateTo}
             onSelectTicket={handleSelectTicket}
           />
         );
@@ -214,7 +142,7 @@ const MainApp = () => {
         return (
           <TaskWorkspacePage
             ticketId={selectedTicketId}
-            onBack={() => setActiveTab('technician_dashboard')}
+            onBack={() => navigateTo('technician_dashboard')}
           />
         );
 
@@ -264,15 +192,14 @@ const MainApp = () => {
         return <UserProfilePage />;
 
       default:
-        return <NotFoundPage onGoHome={() => setActiveTab(getDefaultTab())} />;
+        return <NotFoundPage onGoHome={() => navigateTo(getRoleHome(activeRoleId))} />;
     }
   };
 
   return (
     <AppLayout
       activeTab={activeTab}
-      onSelectTab={setActiveTab}
-      breadcrumb={getBreadcrumbs()}
+      onSelectTab={navigateTo}
       onSelectTicket={handleSelectTicket}
     >
       {renderCurrentView()}

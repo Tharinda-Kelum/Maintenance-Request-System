@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Home, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Home } from 'lucide-react';
 
 export const NotFoundPage = ({ onGoHome }) => {
   return (
@@ -30,7 +30,7 @@ export const UnauthorizedPage = ({ onGoHome }) => {
       </div>
       <h1 className="text-2xl font-bold text-brand-text">Access Restricted (403)</h1>
       <p className="text-xs text-brand-text-secondary max-w-sm mt-1.5 mb-6">
-        You do not have the required role-based permissions to perform operations in this module. Use the Role Switcher in the top navigation to view authorized modules.
+        You do not have the required role-based permissions to access this module. Sign in with an authorized account if you need a different workspace.
       </p>
       <button
         onClick={onGoHome}

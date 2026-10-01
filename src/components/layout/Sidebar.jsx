@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -13,11 +13,9 @@ import {
   ShieldCheck,
   FolderKanban,
   LogOut,
-  ChevronRight,
   Sliders,
   AlertOctagon,
   Layers,
-  Sparkles,
   X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -25,11 +23,10 @@ import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
 import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 
-export const Sidebar = ({ activeTab, onSelectTab, isCollapsed, onToggleCollapse }) => {
-  const { currentUser, activeRoleId, switchRole, logout, availableRoles } = useAuth();
+export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
+  const { currentUser, activeRoleId, activeRoleConfig, logout } = useAuth();
   const { tickets } = useTickets();
   const { itemRequests, inventory } = useInventory();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   // Badge counts
   const pendingReviewCount = tickets.filter((t) => t.status === 'Pending Review' || t.status === 'Submitted').length;
@@ -184,50 +181,16 @@ export const Sidebar = ({ activeTab, onSelectTab, isCollapsed, onToggleCollapse 
         </div>
 
         {/* Role Bar */}
-        <div className="px-5 py-3 bg-[#131926] border-b border-[#1F293D] flex items-center justify-between">
+        <div className="px-5 py-3 bg-[#131926] border-b border-[#1F293D]">
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
-              Viewing Persona
+              Signed-in Role
             </span>
             <span className="text-xs font-semibold text-lime-bright truncate block">
-              {availableRoles[Object.keys(availableRoles).find((k) => availableRoles[k].id === activeRoleId)]?.label}
+              {activeRoleConfig?.label}
             </span>
           </div>
-          <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className="text-[10px] px-2 py-1 rounded bg-[#1F293D] hover:bg-slate-700 text-slate-200 font-medium transition-colors"
-          >
-            Change
-          </button>
         </div>
-
-        {/* Role Menu Popover */}
-        {showRoleMenu && (
-          <div className="p-2 bg-[#0E131E] border-b border-[#1F293D] space-y-1 text-xs">
-            {Object.values(availableRoles).map((role) => (
-              <button
-                key={role.id}
-                onClick={() => {
-                  switchRole(role.id);
-                  setShowRoleMenu(false);
-                  if (role.id === 'general_user') onSelectTab('staff_dashboard');
-                  else if (role.id === 'dept_admin') onSelectTab('dashboard');
-                  else if (role.id === 'technician') onSelectTab('technician_dashboard');
-                  else if (role.id === 'store_keeper') onSelectTab('inventory_dashboard');
-                  else if (role.id === 'super_admin') onSelectTab('superadmin_dashboard');
-                }}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
-                  activeRoleId === role.id
-                    ? 'bg-[#bbf246] text-[#020617] font-bold shadow-sm'
-                    : 'text-slate-300 hover:bg-white/5'
-                }`}
-              >
-                <span>{role.label}</span>
-                {activeRoleId === role.id && <span className="text-[10px] font-extrabold uppercase">Active</span>}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Nav List */}
         <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">

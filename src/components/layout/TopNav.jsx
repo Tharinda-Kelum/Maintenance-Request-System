@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import {
   Search,
   Bell,
-  ChevronDown,
   Shield,
-  CheckCircle2,
   Sun,
   Moon,
   Menu
@@ -20,23 +18,12 @@ export const TopNav = ({
   onOpenSearch,
   onToggleSidebar
 }) => {
-  const { currentUser, activeRoleId, switchRole, availableRoles } = useAuth();
+  const { currentUser, activeRoleId, activeRoleConfig } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [notifications] = useState(INITIAL_NOTIFICATIONS);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
-
-  const handleRoleSelect = (roleId) => {
-    switchRole(roleId);
-    setShowRoleDropdown(false);
-    if (roleId === 'general_user') onSelectTab('staff_dashboard');
-    else if (roleId === 'dept_admin') onSelectTab('dashboard');
-    else if (roleId === 'technician') onSelectTab('technician_dashboard');
-    else if (roleId === 'store_keeper') onSelectTab('inventory_dashboard');
-    else if (roleId === 'super_admin') onSelectTab('superadmin_dashboard');
-  };
 
   const navPillsByRole = {
     general_user: [
@@ -171,70 +158,17 @@ export const TopNav = ({
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Role Switcher Pill Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setShowRoleDropdown(!showRoleDropdown);
-                setShowNotifPopover(false);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-              style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              title="Switch role"
-              aria-expanded={showRoleDropdown}
-            >
-              <Shield className="w-3.5 h-3.5" style={{ color: 'var(--accent-bright)' }} />
-              <span className="hidden sm:inline" style={{ color: 'var(--text-secondary)' }}>Role:</span>
-              <span className="font-semibold hidden sm:inline" style={{ color: 'var(--text-primary)' }}>
-                {availableRoles[Object.keys(availableRoles).find((k) => availableRoles[k].id === activeRoleId)]?.label.split('/')[0]}
-              </span>
-              <ChevronDown className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
-            </button>
-
-            {showRoleDropdown && (
-              <div
-                className="absolute right-0 mt-2 w-64 rounded-2xl shadow-modal p-2 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs"
-                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
-              >
-                <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--border)' }}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>
-                    Switch Active Persona
-                  </span>
-                </div>
-                <div className="py-1 space-y-1">
-                  {Object.values(availableRoles).map((role) => {
-                    const isCurrent = activeRoleId === role.id;
-                    return (
-                      <button
-                        type="button"
-                        key={role.id}
-                        onClick={() => handleRoleSelect(role.id)}
-                        className="w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between"
-                        style={isCurrent ? {
-                          backgroundColor: 'var(--accent-subtle)',
-                          color: 'var(--accent-bright)',
-                          fontWeight: 700,
-                          border: '1px solid var(--accent-border)'
-                        } : {
-                          color: 'var(--text-secondary)'
-                        }}
-                        onMouseEnter={e => { if (!isCurrent) { e.currentTarget.style.backgroundColor = 'var(--bg-surface)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
-                        onMouseLeave={e => { if (!isCurrent) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
-                      >
-                        <div>
-                          <div className="font-medium">{role.label}</div>
-                          <div className="text-[10px] truncate max-w-[170px]" style={{ color: 'var(--text-muted)' }}>
-                            {role.description}
-                          </div>
-                        </div>
-                        {isCurrent && <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent-bright)' }} />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {/* The role is assigned by the authenticated account and cannot be changed in the UI. */}
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium"
+            style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+            title={activeRoleConfig?.label}
+          >
+            <Shield className="w-3.5 h-3.5" style={{ color: 'var(--accent-bright)' }} />
+            <span className="hidden sm:inline" style={{ color: 'var(--text-secondary)' }}>Role:</span>
+            <span className="font-semibold hidden sm:inline" style={{ color: 'var(--text-primary)' }}>
+              {activeRoleConfig?.label.split('/')[0]}
+            </span>
           </div>
 
           {/* Notifications Icon Button */}
@@ -243,7 +177,6 @@ export const TopNav = ({
               type="button"
               onClick={() => {
                 setShowNotifPopover(!showNotifPopover);
-                setShowRoleDropdown(false);
               }}
               className="relative p-2 rounded-full transition-colors"
               style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}

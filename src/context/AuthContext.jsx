@@ -1,45 +1,26 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { USER_ROLES } from '../data/mockData';
+import { authenticate } from '../auth/authService';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [activeRoleId, setActiveRoleId] = useState('general_user');
-  const [currentUser, setCurrentUser] = useState(USER_ROLES.STAFF.defaultUser);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeRoleId, setActiveRoleId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Sync user object when activeRoleId changes
-  useEffect(() => {
-    const roleKey = Object.keys(USER_ROLES).find(
-      (key) => USER_ROLES[key].id === activeRoleId
-    );
-    if (roleKey && USER_ROLES[roleKey]) {
-      setCurrentUser(USER_ROLES[roleKey].defaultUser);
-    }
-  }, [activeRoleId]);
-
-  const switchRole = (roleId) => {
-    setActiveRoleId(roleId);
-    const roleKey = Object.keys(USER_ROLES).find(
-      (key) => USER_ROLES[key].id === roleId
-    );
-    if (roleKey && USER_ROLES[roleKey]) {
-      setCurrentUser(USER_ROLES[roleKey].defaultUser);
-    }
-  };
-
-  const login = (roleId = 'general_user', customUser = null) => {
+  const login = async (credentials) => {
+    const session = await authenticate(credentials);
+    setCurrentUser(session.user);
+    setActiveRoleId(session.roleId);
     setIsAuthenticated(true);
-    if (customUser) {
-      setCurrentUser(customUser);
-      setActiveRoleId(customUser.role);
-    } else {
-      switchRole(roleId);
-    }
+    return session;
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    setActiveRoleId(null);
+    setCurrentUser(null);
   };
 
   return (
@@ -48,11 +29,9 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         currentUser,
         activeRoleId,
-        activeRoleConfig: Object.values(USER_ROLES).find((r) => r.id === activeRoleId) || USER_ROLES.STAFF,
-        switchRole,
+        activeRoleConfig: Object.values(USER_ROLES).find((r) => r.id === activeRoleId) || null,
         login,
-        logout,
-        availableRoles: USER_ROLES
+        logout
       }}
     >
       {children}
