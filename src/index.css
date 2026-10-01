@@ -2,31 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   THEME VARIABLES
+   ============================================================ */
+
+/* DARK MODE (Default) — Authentic Original Neon Lime (#bbf246) */
+:root,
+.dark {
+  color-scheme: dark;
+  --bg-base:        #0B0F17;
+  --bg-header:      rgba(11, 15, 23, 0.95);
+  --bg-card:        #131926;
+  --bg-card-hover:  #182132;
+  --bg-surface:     #1A2234;
+  --bg-surface2:    #0E131E;
+  --border:         #1F293D;
+  --border-light:   #2A364F;
+  --text-primary:   #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --scrollbar-track:#0B0F17;
+  --scrollbar-thumb:#1F293D;
+  --scrollbar-hover:#334155;
+  --select-bg:      #0E131E;
+  --select-color:   #F8FAFC;
+
+  /* Original High-Contrast Neon Lime */
+  --accent:         #bbf246;
+  --accent-bright:  #a3e635;
+  --accent-glow:    rgba(187, 242, 70, 0.45);
+  --accent-subtle:  rgba(187, 242, 70, 0.15);
+  --accent-border:  rgba(187, 242, 70, 0.35);
+  --accent-text:    #020617;
+  --accent-shadow:  0 0 20px -2px rgba(187, 242, 70, 0.45);
+}
+
+/* LIGHT MODE — Clean Modern Slate with Royal Blue Accent (#2563EB) */
+.light {
+  color-scheme: light;
+  --bg-base:        #F8FAFC;
+  --bg-header:      rgba(255, 255, 255, 0.95);
+  --bg-card:        #FFFFFF;
+  --bg-card-hover:  #F8FAFC;
+  --bg-surface:     #F1F5F9;
+  --bg-surface2:    #E2E8F0;
+  --border:         #E2E8F0;
+  --border-light:   #CBD5E1;
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #64748B;
+  --scrollbar-track:#F1F5F9;
+  --scrollbar-thumb:#CBD5E1;
+  --scrollbar-hover:#94A3B8;
+  --select-bg:      #FFFFFF;
+  --select-color:   #0F172A;
+
+  /* Vibrant Royal Blue Accent for Light Mode */
+  --accent:         #2563EB;
+  --accent-bright:  #3B82F6;
+  --accent-glow:    rgba(37, 99, 235, 0.35);
+  --accent-subtle:  rgba(37, 99, 235, 0.10);
+  --accent-border:  rgba(37, 99, 235, 0.30);
+  --accent-text:    #FFFFFF;
+  --accent-shadow:  0 4px 16px -2px rgba(37, 99, 235, 0.40);
+}
+
+/* Base Body Styles */
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   body {
-    background-color: #0B0F17;
-    color: #F8FAFC;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 }
 
-/* Custom dark sleek scrollbars */
+::selection {
+  background-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #0B0F17;
+  background: var(--scrollbar-track);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #1F293D;
+  background: var(--scrollbar-thumb);
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--scrollbar-hover);
 }
 
 /* Transitions */
@@ -34,75 +109,468 @@
   transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Guaranteed High-Contrast Neon Lime Utility Classes */
+/* ============================================================
+   THEME-AWARE UTILITY CLASSES (Dark = Lime, Light = Blue)
+   ============================================================ */
+.btn-accent-active,
 .btn-neon-active {
-  background-color: #bbf246 !important;
-  color: #020617 !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-text) !important;
   font-weight: 700 !important;
-  box-shadow: 0 0 20px -2px rgba(187, 242, 70, 0.45) !important;
+  box-shadow: var(--accent-shadow) !important;
 }
 
+.tab-accent-active,
 .tab-neon-active {
-  background-color: #bbf246 !important;
-  color: #020617 !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-text) !important;
   font-weight: 700 !important;
-  box-shadow: 0 0 16px -2px rgba(187, 242, 70, 0.4) !important;
+  box-shadow: var(--accent-shadow) !important;
 }
 
-.bg-lime-accent {
-  background-color: #bbf246 !important;
-  color: #020617 !important;
-}
-
-.text-lime-accent {
-  color: #bbf246 !important;
-}
-
-.text-lime-bright {
-  color: #a3e635 !important;
-}
-
-.bg-lime-bright {
-  background-color: #a3e635 !important;
-  color: #020617 !important;
-}
-
-.border-lime-bright {
-  border-color: #a3e635 !important;
-}
-
-.bg-lime-subtle {
-  background-color: rgba(187, 242, 70, 0.15) !important;
-  color: #bbf246 !important;
-}
-
-.shadow-lime-glow {
-  box-shadow: 0 0 20px -2px rgba(187, 242, 70, 0.45) !important;
-}
-
-.text-neon-lime {
-  color: #a3e635 !important;
-}
-
+.bg-accent,
+.bg-lime-accent,
 .bg-neon-lime {
-  background-color: #bbf246 !important;
-  color: #020617 !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-text) !important;
 }
 
+.text-accent,
+.text-lime-accent {
+  color: var(--accent) !important;
+}
+
+.text-accent-bright,
+.text-lime-bright,
+.text-neon-lime {
+  color: var(--accent-bright) !important;
+}
+
+.bg-accent-subtle,
+.bg-lime-subtle {
+  background-color: var(--accent-subtle) !important;
+  color: var(--accent-bright) !important;
+}
+
+.border-accent,
+.border-lime-bright,
 .border-neon-lime {
-  border-color: rgba(187, 242, 70, 0.6) !important;
+  border-color: var(--accent-border) !important;
 }
 
+.shadow-accent-glow,
+.shadow-lime-glow,
 .glow-lime {
-  box-shadow: 0 0 25px -4px rgba(187, 242, 70, 0.35);
+  box-shadow: var(--accent-shadow) !important;
 }
 
 .glow-card {
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
-/* Fix any native select dropdown popup background on dark pages */
+/* Select element options */
 select option {
-  background-color: #0E131E;
-  color: #F8FAFC;
+  background-color: var(--select-bg);
+  color: var(--select-color);
+}
+
+/* ============================================================
+   DARK MODE COMPATIBILITY FOR BRAND UTILITIES
+   Ensures no stray white cards appear in dark mode
+   ============================================================ */
+.dark .text-brand-text {
+  color: #F8FAFC !important;
+}
+
+.dark .text-brand-text-secondary {
+  color: #94A3B8 !important;
+}
+
+.dark .border-brand-border {
+  border-color: #1F293D !important;
+}
+
+.dark .bg-brand-card {
+  background-color: #131926 !important;
+}
+
+/* Light-first administration screens in dark mode */
+.dark .bg-white,
+.dark .bg-slate-50,
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/80 {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-slate-100\/70,
+.dark .bg-slate-100\/80 {
+  background-color: var(--bg-surface) !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: var(--border-light) !important;
+}
+
+.dark .text-slate-600,
+.dark .text-brand-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-800,
+.dark .text-slate-900,
+.dark .text-brand-text,
+.dark .text-brand-navy {
+  color: var(--text-primary) !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-brand-border,
+.dark .border-brand-border\/80 {
+  border-color: var(--border) !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-100\/70:hover,
+.dark .hover\:bg-slate-50\/70:hover,
+.dark .focus\:bg-white:focus {
+  background-color: var(--bg-card-hover) !important;
+}
+
+.dark input:not([type='checkbox']):not([type='radio']),
+.dark select,
+.dark textarea {
+  background-color: var(--bg-surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark input[type='checkbox'],
+.dark input[type='radio'] {
+  accent-color: var(--accent);
+}
+
+/* Category swatches that originate from the light design system */
+.dark .bg-amber-50,
+.dark .bg-cyan-50,
+.dark .bg-blue-50,
+.dark .bg-indigo-50,
+.dark .bg-orange-50,
+.dark .bg-stone-50,
+.dark .bg-violet-50,
+.dark .bg-red-50 {
+  background-color: var(--accent-subtle) !important;
+}
+
+.dark .text-amber-600,
+.dark .text-cyan-600,
+.dark .text-blue-600,
+.dark .text-indigo-600,
+.dark .text-orange-600,
+.dark .text-stone-600,
+.dark .text-violet-600,
+.dark .text-red-600 {
+  color: var(--accent-bright) !important;
+}
+
+/* Surfaces used by the slide-out navigation */
+.light .bg-\[\#0D111A\],
+.light .bg-\[\#0A0D15\] {
+  background-color: var(--bg-card) !important;
+}
+
+/* ============================================================
+   LIGHT MODE OVERRIDES FOR APP-WIDE HARDCODED DARK UTILITIES
+   Turns the entire interface into a polished, crisp light theme!
+   ============================================================ */
+
+/* 1. Page & Card Backgrounds */
+.light .bg-\[\#0B0F17\],
+.light .bg-\[\#0b0f17\] {
+  background-color: #F8FAFC !important;
+}
+
+.light .bg-\[\#131926\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.light .bg-\[\#0E131E\] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-\[\#1A2234\] {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-\[\#182132\] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light .bg-\[\#1F293D\] {
+  background-color: #E2E8F0 !important;
+}
+
+.light .bg-\[\#0B0F17\]\/95 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 2. Borders */
+.light .border-\[\#1F293D\],
+.light .border-\[\#1A2234\],
+.light .border-\[\#131926\],
+.light .border-brand-border {
+  border-color: #E2E8F0 !important;
+}
+
+.light .border-\[\#2A364F\] {
+  border-color: #CBD5E1 !important;
+}
+
+.light .border-\[\#1F293D\]\/70,
+.light .border-\[\#1F293D\]\/60 {
+  border-color: #F1F5F9 !important;
+}
+
+.light .divide-\[\#1F293D\] > :not([hidden]) ~ :not([hidden]),
+.light .divide-\[\#1F293D\]\/60 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #F1F5F9 !important;
+}
+
+/* 3. Text Colors in Light Mode */
+.light .text-white {
+  color: #0F172A !important;
+}
+
+.light .text-slate-100 {
+  color: #0F172A !important;
+}
+
+.light .text-slate-200 {
+  color: #1E293B !important;
+}
+
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light .text-slate-400 {
+  color: #64748B !important;
+}
+
+.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+.light .text-brand-text {
+  color: #0F172A !important;
+}
+
+.light .text-brand-text-secondary {
+  color: #64748B !important;
+}
+
+/* 4. Form inputs & selects */
+.light input:not([type='checkbox']):not([type='radio']),
+.light select,
+.light textarea {
+  color: #0F172A !important;
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+.light input[type='checkbox'],
+.light input[type='radio'] {
+  accent-color: var(--accent);
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* 5. Interactive & Hover states */
+.light .hover\:bg-white\/5:hover,
+.light .hover\:bg-\[\#1A2234\]:hover,
+.light .hover\:bg-\[\#182132\]:hover {
+  background-color: #F1F5F9 !important;
+}
+
+.light .hover\:border-slate-600:hover,
+.light .hover\:border-slate-700:hover {
+  border-color: #94A3B8 !important;
+}
+
+.light .hover\:text-white:hover {
+  color: #0F172A !important;
+}
+
+/* 6. Lime -> Blue Accent Transformation in Light Mode */
+.light .bg-\[\#bbf246\],
+.light .bg-lime-bright {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px -1px rgba(37, 99, 235, 0.35) !important;
+}
+
+.light .bg-\[\#bbf246\] *,
+.light .bg-\[\#bbf246\] svg,
+.light .bg-lime-bright *,
+.light .bg-lime-bright svg {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
+.light .text-\[\#a3e635\] {
+  color: #2563EB !important;
+}
+
+.light .bg-\[\#bbf246\]\/15,
+.light .bg-\[\#bbf246\]\/20 {
+  background-color: rgba(37, 99, 235, 0.10) !important;
+  color: #2563EB !important;
+}
+
+.light .bg-\[\#bbf246\]\/15 *,
+.light .bg-\[\#bbf246\]\/20 * {
+  color: #2563EB !important;
+}
+
+.light .border-\[\#a3e635\],
+.light .border-\[\#a3e635\]\/30,
+.light .border-\[\#a3e635\]\/40,
+.light .border-\[\#bbf246\] {
+  border-color: #2563EB !important;
+}
+
+.light .hover\:border-\[\#a3e635\]:hover {
+  border-color: #2563EB !important;
+}
+
+.light .focus\:border-\[\#a3e635\]:focus {
+  border-color: #2563EB !important;
+}
+
+.light .hover\:bg-\[\#a3e635\]:hover {
+  background-color: #1D4ED8 !important;
+}
+
+.light .ring-\[\#a3e635\]\/40,
+.light .ring-\[\#a3e635\]\/60 {
+  --tw-ring-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+.light .shadow-\[0_0_20px_rgba\(187\,242\,70\,0\.45\)\],
+.light .shadow-\[0_0_20px_rgba\(187\,242\,70\,0\.5\)\],
+.light .shadow-\[0_0_16px_rgba\(187\,242\,70\,0\.4\)\],
+.light .shadow-\[0_0_16px_rgba\(187\,242\,70\,0\.5\)\],
+.light .shadow-\[0_0_10px_rgba\(187\,242\,70\,0\.6\)\],
+.light .shadow-\[0_0_10px_rgba\(187\,242\,70\,0\.8\)\],
+.light .shadow-\[0_0_15px_rgba\(187\,242\,70\,0\.2\)\] {
+  box-shadow: 0 4px 14px -1px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* 7. Action Buttons with Solid Colors in Light Mode */
+.light .bg-emerald-600,
+.light .bg-emerald-700,
+.light .bg-purple-600,
+.light .bg-purple-700,
+.light .bg-rose-600,
+.light .bg-rose-700,
+.light .bg-amber-500,
+.light .bg-amber-600,
+.light .bg-blue-600,
+.light .bg-blue-700,
+.light .bg-slate-900,
+.light .bg-slate-800,
+.light .btn-accent-active,
+.light .tab-accent-active,
+.light .bg-accent {
+  color: #FFFFFF !important;
+}
+
+.light .bg-emerald-600 *,
+.light .bg-emerald-700 *,
+.light .bg-purple-600 *,
+.light .bg-purple-700 *,
+.light .bg-rose-600 *,
+.light .bg-rose-700 *,
+.light .bg-amber-500 *,
+.light .bg-amber-600 *,
+.light .bg-blue-600 *,
+.light .bg-blue-700 *,
+.light .bg-slate-900 *,
+.light .bg-slate-800 *,
+.light .bg-brand-blue *,
+.light .btn-accent-active *,
+.light .tab-accent-active *,
+.light .bg-accent * {
+  color: #FFFFFF !important;
+}
+
+.light .bg-brand-blue,
+.light .bg-brand-blue-hover {
+  color: #FFFFFF !important;
+}
+
+/* The branded half of the sign-in screen intentionally stays dark. */
+.light .theme-static-dark,
+.light .theme-static-dark .text-white {
+  color: #FFFFFF !important;
+}
+
+.light .theme-static-dark .text-slate-300 {
+  color: #CBD5E1 !important;
+}
+
+.light .theme-static-dark .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+.light .theme-static-dark .text-blue-200 {
+  color: #BFDBFE !important;
+}
+
+.light .theme-static-dark .text-blue-300 {
+  color: #93C5FD !important;
+}
+
+/* Queue Item Selection in Light Mode */
+.light .bg-\[\#0B0F17\].text-white {
+  background-color: #EFF6FF !important;
+  color: #1E3A8A !important;
+  border-color: #BFDBFE !important;
+}
+
+.light .bg-\[\#0B0F17\].text-white * {
+  color: #1E3A8A !important;
+}
+
+.light .bg-white.text-\[\#020617\] {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+}
+
+.light .bg-white.text-\[\#020617\]:hover {
+  background-color: #1E293B !important;
+}
+
+/* Smooth transition for theme change */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
 }

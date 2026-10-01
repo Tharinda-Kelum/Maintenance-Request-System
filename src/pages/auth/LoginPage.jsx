@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Shield, Lock, Mail, ArrowRight, CheckCircle2, Building, Wrench } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, CheckCircle2, Building, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { UNIVERSITY_INFO, USER_ROLES } from '../../data/mockData';
 
 export const LoginPage = ({ onLoginSuccess }) => {
   const { login } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [email, setEmail] = useState('k.sivalingam@vau.ac.lk');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('demo-password');
   const [rememberMe, setRememberMe] = useState(true);
   const [selectedRole, setSelectedRole] = useState('general_user');
 
@@ -23,9 +25,9 @@ export const LoginPage = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#F7F9FC]">
+    <div className="min-h-screen w-full flex flex-col md:flex-row" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       {/* Left Branded Panel */}
-      <div className="md:w-5/12 lg:w-1/2 bg-[#0B1F3A] text-white p-8 md:p-14 flex flex-col justify-between relative overflow-hidden border-r border-[#152B4D]">
+      <div className="theme-static-dark md:w-5/12 lg:w-1/2 bg-[#0B1F3A] text-white p-8 md:p-14 flex flex-col justify-between relative overflow-hidden border-r border-[#152B4D]">
         {/* Subtle geometric architectural pattern background */}
         <div className="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
         <div className="absolute top-1/4 -left-20 w-80 h-80 rounded-full bg-indigo-600/10 blur-2xl pointer-events-none" />
@@ -84,7 +86,19 @@ export const LoginPage = ({ onLoginSuccess }) => {
       </div>
 
       {/* Right Login Form Panel */}
-      <div className="md:w-7/12 lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center max-w-xl mx-auto w-full">
+      <div className="relative md:w-7/12 lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center max-w-xl mx-auto w-full">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="absolute top-6 right-6 inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold"
+          style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          <span>{isDark ? 'Dark' : 'Light'}</span>
+        </button>
+
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-brand-text">Authorized Sign In</h2>
           <p className="text-xs text-brand-text-secondary mt-1">
@@ -157,7 +171,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder="Enter your password"
                 className="w-full pl-10 pr-4 py-2.5 text-xs text-brand-text bg-white border border-brand-border rounded-input outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 transition-all"
               />
             </div>

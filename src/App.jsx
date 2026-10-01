@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { TicketProvider } from './context/TicketContext';
 import { InventoryProvider } from './context/InventoryContext';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
 
 // Auth Pages
@@ -281,14 +282,16 @@ const MainApp = () => {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <TicketProvider>
-          <InventoryProvider>
-            <MainApp />
-          </InventoryProvider>
-        </TicketProvider>
-      </AuthProvider>
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <TicketProvider>
+            <InventoryProvider>
+              <MainApp />
+            </InventoryProvider>
+          </TicketProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
+import { useTheme } from '../../context/ThemeContext';
 
 export const AppLayout = ({
   activeTab,
@@ -12,10 +13,30 @@ export const AppLayout = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { isDark } = useTheme();
+
+  useEffect(() => {
+    const handleKeyboardShortcut = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setIsSearchOpen((isOpen) => !isOpen);
+      }
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyboardShortcut);
+    return () => window.removeEventListener('keydown', handleKeyboardShortcut);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-lime-accent selection:text-slate-950">
-      {/* Top Floating Pill Navigation (Matching Reference Screenshot) */}
+    <div
+      className={`min-h-screen text-[var(--text-primary)] flex flex-col font-sans selection:bg-[var(--accent)] selection:text-[var(--accent-text)] ${isDark ? 'dark' : 'light'}`}
+      style={{ backgroundColor: 'var(--bg-base)' }}
+    >
+      {/* Top Floating Pill Navigation */}
       <TopNav
         activeTab={activeTab}
         onSelectTab={onSelectTab}
@@ -46,18 +67,20 @@ export const AppLayout = ({
       </div>
 
       {/* Global Search Dialog */}
-      <GlobalSearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onSelectTicket={(ticketId) => {
-          setIsSearchOpen(false);
-          onSelectTicket(ticketId);
-        }}
-        onNavigate={(tab) => {
-          setIsSearchOpen(false);
-          onSelectTab(tab);
-        }}
-      />
+      {isSearchOpen && (
+        <GlobalSearchModal
+          isOpen
+          onClose={() => setIsSearchOpen(false)}
+          onSelectTicket={(ticketId) => {
+            setIsSearchOpen(false);
+            onSelectTicket(ticketId);
+          }}
+          onNavigate={(tab) => {
+            setIsSearchOpen(false);
+            onSelectTab(tab);
+          }}
+        />
+      )}
     </div>
   );
 };

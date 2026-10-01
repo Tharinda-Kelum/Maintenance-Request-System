@@ -196,7 +196,7 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
           <div className="flex items-center justify-end">
             <button
               onClick={() => onNavigate('requests')}
-              className="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-[#020617] text-xs font-bold rounded-full transition-all text-center shadow-sm"
+              className="w-full py-2.5 px-4 bg-[var(--text-primary)] hover:opacity-90 text-[var(--bg-base)] text-xs font-bold rounded-full transition-all text-center shadow-sm"
             >
               Dispatch Work Order
             </button>
@@ -284,13 +284,13 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
 
         {/* Dual-Panel Container */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* LEFT PANEL: High Contrast Clean White Card */}
-          <div className="lg:col-span-5 bg-white text-slate-900 rounded-3xl p-5 shadow-card-hover border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+          {/* LEFT PANEL: Sleek Theme Card */}
+          <div className="lg:col-span-5 bg-[#131926] text-white rounded-3xl p-5 shadow-card border border-[#1F293D]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D] mb-2">
+              <h3 className="text-sm font-bold text-white tracking-tight">
                 {tabFilter} Maintenance Queue
               </h3>
-              <span className="text-xs text-slate-500 font-mono font-bold">
+              <span className="text-xs text-slate-400 font-mono font-bold">
                 {queueTickets.length} tickets
               </span>
             </div>
@@ -306,7 +306,7 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
                     className={`p-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       isSelected
                         ? 'bg-[#0B0F17] text-white shadow-xl ring-2 ring-[#a3e635]/60 border border-[#a3e635]/40'
-                        : 'bg-slate-50/80 hover:bg-slate-100 text-slate-900 border border-slate-200/60'
+                        : 'bg-[#0E131E] hover:bg-[#1A2234] text-slate-200 border border-[#1F293D]'
                     }`}
                   >
                     <div className="flex items-center gap-3 truncate">
@@ -314,7 +314,7 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
                         className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
                           isSelected
                             ? 'bg-[#bbf246] text-[#020617] shadow-[0_0_10px_rgba(187,242,70,0.6)]'
-                            : 'bg-slate-200 text-slate-800'
+                            : 'bg-[#1A2234] text-slate-300'
                         }`}
                       >
                         {t.requester.name.slice(0, 2)}
@@ -323,19 +323,17 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
                         <div className="flex items-center gap-1.5">
                           <span
                             className={`font-mono text-xs font-bold ${
-                              isSelected ? 'text-[#a3e635]' : 'text-slate-950 font-extrabold'
+                              isSelected ? 'text-[#a3e635]' : 'text-slate-300'
                             }`}
                           >
                             #{t.id.replace('MRS-2026-', '')}
                           </span>
-                          <span className={`text-[10px] font-medium ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
+                          <span className="text-[10px] font-medium text-slate-400">
                             • in 2 days
                           </span>
                         </div>
                         <div
-                          className={`text-xs truncate font-semibold mt-0.5 ${
-                            isSelected ? 'text-white' : 'text-slate-900'
-                          }`}
+                          className="text-xs truncate font-semibold mt-0.5 text-white"
                         >
                           {t.title}
                         </div>
@@ -347,15 +345,13 @@ export const StaffDashboard = ({ onNavigate, onSelectTicket }) => {
                         className={`text-[10px] px-2 py-0.5 rounded-full font-bold block mb-1 ${
                           isSelected
                             ? 'bg-[#bbf246]/20 text-[#a3e635] border border-[#a3e635]/40'
-                            : 'bg-slate-200/80 text-slate-700'
+                            : 'bg-[#1A2234] text-slate-400'
                         }`}
                       >
                         {t.status}
                       </span>
                       <span
-                        className={`font-mono text-xs font-bold ${
-                          isSelected ? 'text-white' : 'text-slate-900'
-                        }`}
+                        className="font-mono text-xs font-bold text-slate-300"
                       >
                         {t.priority === 'Urgent' ? '4.0 hrs' : t.priority === 'High' ? '12.0 hrs' : '24.0 hrs'}
                       </span>

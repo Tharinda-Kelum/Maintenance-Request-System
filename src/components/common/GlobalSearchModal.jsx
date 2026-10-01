@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, FileText, Wrench, Package, MapPin, X, ArrowRight } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, FileText, Package, X, ArrowRight } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
 import { TECHNICIANS_DIRECTORY } from '../../data/mockData';
@@ -8,17 +8,6 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
   const [query, setQuery] = useState('');
   const { tickets } = useTickets();
   const { inventory } = useInventory();
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (isOpen) onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const results = useMemo(() => {
     if (!query.trim()) return { tickets: [], inventory: [], technicians: [] };
@@ -153,7 +142,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
                       <div
                         key={item.id}
                         onClick={() => {
-                          onNavigate && onNavigate('inventory_items');
+                          onNavigate?.('inventory_items');
                           onClose();
                         }}
                         className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-[#1F293D]"

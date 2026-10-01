@@ -39,8 +39,8 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
   if (!ticket) {
     return (
       <div className="text-center py-12">
-        <p>No active maintenance task selected.</p>
-        <button onClick={onBack} className="mt-2 text-xs text-brand-blue underline">
+        <p className="text-slate-400">No active maintenance task selected.</p>
+        <button onClick={onBack} className="mt-2 text-xs text-[#a3e635] underline font-bold">
           Return to Queue
         </button>
       </div>
@@ -84,21 +84,21 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-150">
       {/* Top Header */}
-      <div className="bg-white p-5 rounded-card border border-brand-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#131926] p-5 rounded-2xl border border-[#1F293D] shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-brand-text hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-full text-slate-400 hover:text-white bg-[#0E131E] border border-[#1F293D] hover:bg-[#1A2234] transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-brand-blue">{ticket.id}</span>
+              <span className="font-mono text-xs font-bold text-[#a3e635]">{ticket.id}</span>
               <StatusBadge status={ticket.status} />
               <PriorityBadge priority={ticket.priority} />
             </div>
-            <h1 className="text-lg font-bold text-brand-text mt-0.5">{ticket.title}</h1>
+            <h1 className="text-lg font-bold text-white mt-1">{ticket.title}</h1>
           </div>
         </div>
 
@@ -107,7 +107,7 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           {ticket.status === 'Assigned' && (
             <button
               onClick={handleStartInspection}
-              className="px-4 py-2 bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold rounded-lg shadow-sm"
+              className="px-4 py-2 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full shadow-[0_0_15px_rgba(187,242,70,0.35)] transition-all"
             >
               Start Site Inspection
             </button>
@@ -115,7 +115,7 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           {ticket.status === 'Inspection' && (
             <button
               onClick={handleStartRepair}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm"
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-full shadow-sm transition-all"
             >
               Start Repair Work
             </button>
@@ -123,7 +123,7 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           {(ticket.status === 'In Progress' || ticket.status === 'Awaiting Parts') && (
             <button
               onClick={handleFinishRepair}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-sm transition-all"
             >
               Mark Repair Complete
             </button>
@@ -133,22 +133,22 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
 
       {/* Campus Location Card & Requester Details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-card border border-brand-border p-4 shadow-xs text-xs space-y-1.5">
-          <span className="font-semibold uppercase tracking-wider text-brand-text-secondary text-[10px]">
+        <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-5 shadow-card text-xs space-y-1.5">
+          <span className="font-semibold uppercase tracking-wider text-slate-400 text-[10px]">
             Target Location
           </span>
-          <div className="text-sm font-bold text-brand-text">{ticket.room}</div>
-          <div className="text-slate-600">{ticket.building} • {ticket.floor}</div>
-          <div className="text-slate-500">{ticket.faculty}</div>
+          <div className="text-sm font-bold text-white">{ticket.room}</div>
+          <div className="text-slate-300">{ticket.building} • {ticket.floor}</div>
+          <div className="text-slate-400">{ticket.faculty}</div>
         </div>
 
-        <div className="bg-white rounded-card border border-brand-border p-4 shadow-xs text-xs space-y-1.5">
-          <span className="font-semibold uppercase tracking-wider text-brand-text-secondary text-[10px]">
+        <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-5 shadow-card text-xs space-y-1.5">
+          <span className="font-semibold uppercase tracking-wider text-slate-400 text-[10px]">
             Faculty Requester
           </span>
-          <div className="text-sm font-bold text-brand-text">{ticket.requester.name}</div>
-          <div className="text-slate-600">{ticket.requester.role}</div>
-          <div className="font-mono text-slate-500 flex items-center gap-1">
+          <div className="text-sm font-bold text-white">{ticket.requester.name}</div>
+          <div className="text-slate-300">{ticket.requester.role}</div>
+          <div className="font-mono text-slate-400 flex items-center gap-1">
             <Phone className="w-3 h-3 text-slate-400" />
             <span>{ticket.requester.phone || 'ext. 204'}</span>
           </div>
@@ -156,11 +156,11 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
       </div>
 
       {/* Section 1: Mobile Diagnostic Checklist */}
-      <div className="bg-white rounded-card border border-brand-border p-6 shadow-xs space-y-4">
+      <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-6 shadow-card space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-brand-text">Field Inspection Checklist</h3>
-            <p className="text-xs text-brand-text-secondary mt-0.5">
+            <h3 className="text-sm font-bold text-white">Field Inspection Checklist</h3>
+            <p className="text-xs text-slate-400 mt-0.5">
               Follow safe standard operating procedures for {ticket.category}
             </p>
           </div>
@@ -174,17 +174,17 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
             <div
               key={idx}
               onClick={() => toggleChecklistItem(ticket.id, idx)}
-              className={`p-3 rounded-lg border flex items-center gap-3 cursor-pointer transition-colors ${
+              className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-colors ${
                 item.done
-                  ? 'bg-emerald-50/50 border-emerald-200 text-emerald-900'
-                  : 'bg-slate-50/60 border-slate-200 text-slate-700 hover:bg-slate-100'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-[#0E131E] border-[#1F293D] text-slate-300 hover:bg-[#1A2234]'
               }`}
             >
               <input
                 type="checkbox"
                 checked={item.done}
                 onChange={() => {}} // handled by div
-                className="rounded text-brand-blue focus:ring-brand-blue w-4 h-4"
+                className="rounded text-[#bbf246] focus:ring-[#bbf246] w-4 h-4 bg-[#0E131E] border-[#1F293D]"
               />
               <span className={`text-xs flex-1 ${item.done ? 'line-through text-slate-500' : 'font-medium'}`}>
                 {item.task}
@@ -195,10 +195,10 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
       </div>
 
       {/* Section 2: Diagnosis Notes */}
-      <div className="bg-white rounded-card border border-brand-border p-6 shadow-xs space-y-4">
+      <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-6 shadow-card space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-brand-text">Diagnostic Findings & Technical Notes</h3>
-          <p className="text-xs text-brand-text-secondary mt-0.5">
+          <h3 className="text-sm font-bold text-white">Diagnostic Findings & Technical Notes</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
             Document root cause of failure (e.g. capacitor voltage breakdown, broken valve, etc.)
           </p>
         </div>
@@ -208,13 +208,13 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           value={diagnosis}
           onChange={(e) => setDiagnosis(e.target.value)}
           placeholder="Enter detailed technical measurements, pressure readings, motor insulation ohms, or hardware diagnostics..."
-          className="w-full p-3 text-xs text-brand-text border border-brand-border rounded-lg outline-none focus:border-brand-blue"
+          className="w-full p-3.5 text-xs text-white bg-[#0E131E] border border-[#1F293D] rounded-xl outline-none focus:border-[#a3e635]"
         />
 
         <div className="flex justify-end">
           <button
             onClick={handleSaveDiagnosis}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xs"
+            className="px-4 py-2 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full shadow-[0_0_15px_rgba(187,242,70,0.35)] transition-all"
           >
             Save Diagnosis Note
           </button>
@@ -222,21 +222,21 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
       </div>
 
       {/* Section 3: Spare Parts Requisition */}
-      <div className="bg-white rounded-card border border-brand-border p-6 shadow-xs space-y-4">
+      <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-6 shadow-card space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-brand-text flex items-center gap-2">
-              <Package className="w-4 h-4 text-brand-blue" />
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Package className="w-4 h-4 text-[#a3e635]" />
               <span>Required Spare Parts & Consumables</span>
             </h3>
-            <p className="text-xs text-brand-text-secondary mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Direct integration with Central Maintenance Stores
             </p>
           </div>
 
           <button
             onClick={() => setShowPartModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-brand-blue hover:bg-blue-100 rounded-lg text-xs font-semibold border border-blue-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#bbf246]/15 text-[#a3e635] hover:bg-[#bbf246]/25 rounded-full text-xs font-bold border border-[#a3e635]/40 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Requisition Part from Stores</span>
@@ -248,17 +248,17 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
             {ticket.itemRequests.map((req, i) => (
               <div
                 key={i}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs"
+                className="p-3.5 bg-[#0E131E] border border-[#1F293D] rounded-xl flex items-center justify-between text-xs"
               >
                 <div>
-                  <span className="font-semibold text-brand-text">{req.name}</span>
+                  <span className="font-semibold text-white">{req.name}</span>
                   <span className="text-slate-400 block text-[11px]">Requested: {req.quantity} ({req.date})</span>
                 </div>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                     req.status === 'Issued'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-amber-100 text-amber-800'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                   }`}
                 >
                   {req.status}
@@ -267,17 +267,17 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
             ))}
           </div>
         ) : (
-          <div className="text-xs text-slate-400 text-center py-4 bg-slate-50 rounded-lg border border-dashed">
+          <div className="text-xs text-slate-400 text-center py-4 bg-[#0E131E] rounded-xl border border-dashed border-[#1F293D]">
             No spare parts requested for this work order yet.
           </div>
         )}
       </div>
 
       {/* Section 4: Final Work Completion Report */}
-      <div className="bg-white rounded-card border border-brand-border p-6 shadow-xs space-y-4">
+      <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-6 shadow-card space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-brand-text">Completion Work Report</h3>
-          <p className="text-xs text-brand-text-secondary mt-0.5">
+          <h3 className="text-sm font-bold text-white">Completion Work Report</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
             Summarize the repair procedures executed before handing back to faculty.
           </p>
         </div>
@@ -287,16 +287,16 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           value={reportSummary}
           onChange={(e) => setReportSummary(e.target.value)}
           placeholder="e.g. Replaced 45uF motor capacitor, charged 1.2kg R410A refrigerant. Tested cooling for 45 minutes; air output steady at 16°C. Work area cleaned."
-          className="w-full p-3 text-xs text-brand-text border border-brand-border rounded-lg outline-none focus:border-brand-blue"
+          className="w-full p-3.5 text-xs text-white bg-[#0E131E] border border-[#1F293D] rounded-xl outline-none focus:border-[#a3e635]"
         />
 
         <div className="flex items-center justify-between pt-2">
           <span className="text-xs text-slate-400">
-            Sign-off technician: <strong>{currentUser.name}</strong>
+            Sign-off technician: <strong className="text-white">{currentUser.name}</strong>
           </span>
           <button
             onClick={handleFinishRepair}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-sm transition-colors"
           >
             Submit Work Report & Mark Resolved
           </button>
@@ -314,13 +314,13 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
             <>
               <button
                 onClick={() => setShowPartModal(false)}
-                className="px-4 py-2 border border-slate-300 text-xs font-semibold text-slate-700 rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 border border-[#1F293D] bg-[#0E131E] hover:bg-[#1A2234] text-xs font-semibold text-slate-300 rounded-full"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRequestPartSubmit}
-                className="px-5 py-2 bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold rounded-lg shadow-sm"
+                className="px-5 py-2 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full shadow-[0_0_15px_rgba(187,242,70,0.35)]"
               >
                 Send Request to Stores
               </button>
@@ -329,16 +329,16 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
         >
           <form onSubmit={handleRequestPartSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-brand-text mb-1.5">
+              <label className="block font-semibold text-slate-300 mb-1.5">
                 Select Inventory Item
               </label>
               <select
                 value={selectedItemCode}
                 onChange={(e) => setSelectedItemCode(e.target.value)}
-                className="w-full p-2.5 border border-brand-border rounded-lg outline-none"
+                className="w-full p-2.5 bg-[#0E131E] border border-[#1F293D] text-white rounded-xl outline-none focus:border-[#a3e635]"
               >
                 {inventory.map((item) => (
-                  <option key={item.id} value={item.code}>
+                  <option key={item.id} value={item.code} className="bg-[#0E131E] text-white">
                     {item.name} ({item.code}) - {item.stock} in stock
                   </option>
                 ))}
@@ -347,7 +347,7 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-brand-text mb-1.5">
+                <label className="block font-semibold text-slate-300 mb-1.5">
                   Quantity Required
                 </label>
                 <input
@@ -356,22 +356,22 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
                   max="50"
                   value={requestedQuantity}
                   onChange={(e) => setRequestedQuantity(parseInt(e.target.value) || 1)}
-                  className="w-full p-2.5 border border-brand-border rounded-lg outline-none"
+                  className="w-full p-2.5 bg-[#0E131E] border border-[#1F293D] text-white rounded-xl outline-none focus:border-[#a3e635]"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-brand-text mb-1.5">
+                <label className="block font-semibold text-slate-300 mb-1.5">
                   Requisition Urgency
                 </label>
                 <select
                   value={partUrgency}
                   onChange={(e) => setPartUrgency(e.target.value)}
-                  className="w-full p-2.5 border border-brand-border rounded-lg outline-none"
+                  className="w-full p-2.5 bg-[#0E131E] border border-[#1F293D] text-white rounded-xl outline-none focus:border-[#a3e635]"
                 >
-                  <option>Urgent</option>
-                  <option>High</option>
-                  <option>Normal</option>
+                  <option className="bg-[#0E131E] text-white">Urgent</option>
+                  <option className="bg-[#0E131E] text-white">High</option>
+                  <option className="bg-[#0E131E] text-white">Normal</option>
                 </select>
               </div>
             </div>

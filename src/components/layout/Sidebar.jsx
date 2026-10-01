@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
+import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 
 export const Sidebar = ({ activeTab, onSelectTab, isCollapsed, onToggleCollapse }) => {
   const { currentUser, activeRoleId, switchRole, logout, availableRoles } = useAuth();
@@ -160,9 +161,11 @@ export const Sidebar = ({ activeTab, onSelectTab, isCollapsed, onToggleCollapse 
         {/* Header */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-[#1F293D] bg-[#0A0D15]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#bbf246] text-[#020617] flex items-center justify-center font-extrabold text-xs shadow-[0_0_16px_rgba(187,242,70,0.4)]">
-              UoV
-            </div>
+            <img
+              src={universityLogo}
+              alt="University of Vavuniya logo"
+              className="w-8 h-8 object-contain flex-shrink-0"
+            />
             <div>
               <h2 className="text-xs font-bold text-white uppercase tracking-wider">
                 Maintenance System
