@@ -151,7 +151,7 @@ const MainApp = () => {
       case 'inventory_items':
       case 'item_requests':
       case 'transactions':
-        return <InventoryDashboard />;
+        return <InventoryDashboard activeView={activeTab} onNavigate={navigateTo} />;
 
       // Reports & Analytics
       case 'reports':

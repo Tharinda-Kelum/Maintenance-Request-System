@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { StatCard } from '../../components/common/StatCard';
 import { Modal } from '../../components/common/Modal';
 
-export const InventoryDashboard = () => {
+export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavigate }) => {
   const {
     inventory,
     itemRequests,
@@ -30,7 +30,23 @@ export const InventoryDashboard = () => {
   } = useInventory();
   const { currentUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('items'); // 'items' | 'requests' | 'transactions'
+  const [localTab, setLocalTab] = useState('items');
+  const inventoryViews = {
+    items: 'inventory_items',
+    requests: 'item_requests',
+    transactions: 'transactions'
+  };
+  const activeTab = activeView === 'parts_request' || !onNavigate
+    ? localTab
+    : Object.keys(inventoryViews).find((tab) => inventoryViews[tab] === activeView) || 'items';
+
+  const selectTab = (tab) => {
+    if (activeView === 'parts_request' || !onNavigate) {
+      setLocalTab(tab);
+      return;
+    }
+    onNavigate(inventoryViews[tab]);
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [showPOModal, setShowPOModal] = useState(false);
   const [selectedPOItem, setSelectedPOItem] = useState(null);
@@ -132,7 +148,7 @@ export const InventoryDashboard = () => {
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button
-          onClick={() => setActiveTab('items')}
+          onClick={() => selectTab('items')}
           className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${
             activeTab === 'items'
               ? 'bg-[#bbf246] text-[#020617] shadow-[0_0_16px_rgba(187,242,70,0.5)]'
@@ -142,7 +158,7 @@ export const InventoryDashboard = () => {
           Stock Catalog ({inventory.length})
         </button>
         <button
-          onClick={() => setActiveTab('requests')}
+          onClick={() => selectTab('requests')}
           className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 ${
             activeTab === 'requests'
               ? 'bg-[#bbf246] text-[#020617] shadow-[0_0_16px_rgba(187,242,70,0.5)]'
@@ -159,7 +175,7 @@ export const InventoryDashboard = () => {
           )}
         </button>
         <button
-          onClick={() => setActiveTab('transactions')}
+          onClick={() => selectTab('transactions')}
           className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${
             activeTab === 'transactions'
               ? 'bg-[#bbf246] text-[#020617] shadow-[0_0_16px_rgba(187,242,70,0.5)]'
