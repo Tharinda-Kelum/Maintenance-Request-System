@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { UNIVERSITY_INFO } from '../../data/mockData';
 import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
+import campusMaintenance from '../../assets/campus-maintenance.png';
 
 export const LoginPage = ({ onLoginSuccess }) => {
   const { login } = useAuth();
@@ -32,9 +33,22 @@ export const LoginPage = ({ onLoginSuccess }) => {
     <div className="min-h-screen w-full flex flex-col md:flex-row" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       {/* Left Branded Panel */}
       <div className="theme-static-dark md:w-5/12 lg:w-1/2 bg-[#0B1F3A] text-white p-8 md:p-14 flex flex-col justify-between relative overflow-hidden border-r border-[#152B4D]">
-        {/* Subtle geometric architectural pattern background */}
-        <div className="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/4 -left-20 w-80 h-80 rounded-full bg-indigo-600/10 blur-2xl pointer-events-none" />
+        {/* Separate decorative layers keep the logo and content fully opaque. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${campusMaintenance})`,
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center bottom'
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, rgba(7, 23, 46, 0.92) 0%, rgba(7, 23, 46, 0.90) 35%, rgba(7, 23, 46, 0.78) 65%, rgba(7, 23, 46, 0.70) 100%)' }}
+        />
 
         {/* Top: University Header */}
         <div className="relative z-10">
@@ -52,7 +66,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
           </div>
 
           <div className="mt-12 max-w-md">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-semibold mb-4">
               <Building className="w-3.5 h-3.5" />
               <span>Campus Facility & Maintenance Portal</span>
             </div>
@@ -83,7 +97,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
 
         {/* Bottom: Institutional Note */}
         <div className="relative z-10 pt-6 border-t border-white/10 text-xs text-slate-400 flex items-center justify-end">
-          <span className="font-mono text-[11px] text-blue-300">{UNIVERSITY_INFO.systemCode}</span>
+          <span className="font-mono text-[11px] text-blue-200">{UNIVERSITY_INFO.systemCode}</span>
         </div>
       </div>
 
