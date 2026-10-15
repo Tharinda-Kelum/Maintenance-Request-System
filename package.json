@@ -1,20 +1,23 @@
 {
-  "name": "backend",
+  "name": "maintenance-request-backend",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
+  "description": "MongoDB API for the campus maintenance approval and inspection workflow",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed": "node seed/seed.js",
-    "validate": "node seed/validate_schemas.js"
+    "setup": "node scripts/setup-env.js",
+    "seed": "node src/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "engines": { "node": ">=20" },
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^9.9.5"
+    "bcryptjs": "^3.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^5.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^8.0.0",
+    "multer": "^2.0.0"
   }
 }

@@ -1,0 +1,14 @@
+const router = require('express').Router();
+const controller = require('../controllers/authController');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
+const managers = ['HOD', 'DEAN', 'HEAD_OF_MAINTENANCE', 'SUPERVISOR', 'SUPER_ADMIN'];
+router.post('/login', controller.login);
+router.post('/logout', controller.logout);
+router.use(authenticateToken);
+router.get('/me', controller.me);
+router.post('/change-password', controller.changePassword);
+router.get('/technicians', controller.getDirectory);
+router.get('/users', authorizeRoles(...managers), controller.getUsers);
+router.post('/users/create-staff', authorizeRoles(...managers), controller.createUser);
+router.patch('/users/:id', authorizeRoles(...managers), controller.updateUser);
+module.exports = router;

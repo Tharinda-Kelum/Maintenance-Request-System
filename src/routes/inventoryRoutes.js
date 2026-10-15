@@ -1,0 +1,15 @@
+const router = require('express').Router();
+const controller = require('../controllers/inventoryController');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
+const stores = authorizeRoles('STORE_KEEPER', 'HEAD_OF_MAINTENANCE', 'SUPER_ADMIN');
+router.use(authenticateToken, authorizeRoles('TECHNICIAN', 'SUPERVISOR', 'STORE_KEEPER', 'HEAD_OF_MAINTENANCE', 'SUPER_ADMIN'));
+router.get('/', controller.getInventoryItems);
+router.post('/', stores, controller.upsertInventoryItem);
+router.get('/requests', controller.getRequests);
+router.post('/requests', authorizeRoles('TECHNICIAN', 'SUPERVISOR'), controller.createRequest);
+router.patch('/requests/:id/issue', stores, controller.issueRequest);
+router.patch('/requests/:id/reject', stores, controller.rejectRequest);
+router.get('/transactions', stores, controller.getTransactions);
+router.post('/purchase-requests', stores, controller.purchaseRequest);
+router.post('/:id/adjust', stores, controller.adjustStock);
+module.exports = router;

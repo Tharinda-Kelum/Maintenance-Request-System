@@ -1,0 +1,11 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { randomBytes } = require('node:crypto');
+const dotenv = require('dotenv');
+const file = path.join(__dirname, '../.env');
+const previous = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+const parsed = dotenv.parse(previous);
+const defaults = { PORT: '5000', MONGODB_URI: 'mongodb://127.0.0.1:27017/maintenance_db', JWT_SECRET: randomBytes(48).toString('hex'), FRONTEND_ORIGIN: 'http://localhost:5173,http://127.0.0.1:5173' };
+const missing = Object.entries(defaults).filter(([key]) => !parsed[key]);
+if (missing.length) fs.appendFileSync(file, `${previous && !previous.endsWith('\n') ? '\n' : ''}${missing.map(([key, value]) => `${key}=${value}`).join('\n')}\n`);
+console.log('Backend environment ready. Existing configured values were preserved.');

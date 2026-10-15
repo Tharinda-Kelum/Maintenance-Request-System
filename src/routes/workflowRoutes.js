@@ -1,0 +1,17 @@
+const router = require('express').Router();
+const controller = require('../controllers/requestController');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
+router.use(authenticateToken);
+router.get('/tickets', controller.getTickets);
+router.get('/tickets/:id', controller.getTicket);
+router.post('/tickets', authorizeRoles('STAFF'), controller.createTicket);
+router.post('/tickets/hod-review', authorizeRoles('HOD'), controller.hodReview);
+router.post('/tickets/dean-review', authorizeRoles('DEAN'), controller.deanReview);
+router.post('/tickets/forward-head', authorizeRoles('HEAD_OF_MAINTENANCE'), controller.forwardToSupervisor);
+router.post('/tickets/assign-tech', authorizeRoles('SUPERVISOR'), controller.assignTechnician);
+router.post('/tickets/inspection-report', authorizeRoles('TECHNICIAN'), controller.submitInspectionReport);
+router.post('/tickets/fulfill-arrangements', authorizeRoles('SUPERVISOR'), controller.fulfillArrangements);
+router.post('/tickets/completion-report', authorizeRoles('TECHNICIAN'), controller.submitCompletionReport);
+router.post('/tickets/supervisor-review', authorizeRoles('SUPERVISOR'), controller.reviewCompletedWork);
+router.post('/tickets/:id/comments', controller.addComment);
+module.exports = router;
