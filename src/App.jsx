@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { TicketProvider } from './context/TicketContext';
+import { TicketProvider, useTickets } from './context/TicketContext';
 import { InventoryProvider } from './context/InventoryContext';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { LocationProvider } from './context/LocationContext';
+import { SettingsProvider } from './context/SettingsContext';
+import { AssignTechnicianModal } from './pages/admin/AssignTechnicianModal';
+import { ReviewTicketDrawer } from './pages/admin/ReviewTicketDrawer';
 import { AppLayout } from './components/layout/AppLayout';
 import { canAccessTab, getRoleHome } from './auth/accessControl';
 
@@ -20,10 +25,12 @@ import { UserProfilePage } from './pages/staff/UserProfilePage';
 // Department Admin Pages
 import { DeptAdminDashboard } from './pages/admin/DeptAdminDashboard';
 import { DeptReportsPage } from './pages/admin/DeptReportsPage';
+import { TechnicianWorkloadPage } from './pages/admin/TechnicianWorkloadPage';
 
 // Technician Pages
 import { TechnicianDashboard } from './pages/technician/TechnicianDashboard';
 import { TaskWorkspacePage } from './pages/technician/TaskWorkspacePage';
+import { PartsRequestsPage } from './pages/technician/PartsRequestsPage';
 
 // Inventory Pages
 import { InventoryDashboard } from './pages/inventory/InventoryDashboard';
@@ -47,9 +54,12 @@ import { NotFoundPage, UnauthorizedPage } from './pages/errors/NotFoundPage';
 
 const MainApp = () => {
   const { isAuthenticated, activeRoleId } = useAuth();
+  const { tickets } = useTickets();
 
   const [activeTab, setActiveTab] = useState('staff_dashboard');
   const [selectedTicketId, setSelectedTicketId] = useState('MRS-2026-0148');
+  const [assignTicket, setAssignTicket] = useState(null);
+  const [reviewTicket, setReviewTicket] = useState(null);
 
   if (!isAuthenticated) {
     return <LoginPage onLoginSuccess={(roleId) => setActiveTab(getRoleHome(roleId))} />;
@@ -105,14 +115,11 @@ const MainApp = () => {
       case 'request_detail':
         return (
           <RequestDetailPage
+            key={selectedTicketId}
             ticketId={selectedTicketId}
-            onBack={() => navigateTo('requests')}
-            onOpenAssign={() => {
-              // open assign modal
-            }}
-            onOpenReview={() => {
-              navigateTo('review_queue');
-            }}
+            onBack={() => navigateTo(activeRoleId === 'general_user' ? 'my_requests' : 'requests')}
+            onOpenAssign={(ticket) => setAssignTicket(ticket)}
+            onOpenReview={(ticket) => setReviewTicket(ticket)}
           />
         );
 
@@ -121,13 +128,14 @@ const MainApp = () => {
       case 'review_queue':
         return (
           <DeptAdminDashboard
+            reviewOnly={activeTab === 'review_queue'}
             onNavigate={navigateTo}
             onSelectTicket={handleSelectTicket}
           />
         );
 
       case 'technicians':
-        return <AnalyticsDashboard />;
+        return <TechnicianWorkloadPage onSelectTicket={handleSelectTicket} />;
 
       // Technician Views
       case 'technician_dashboard':
@@ -141,12 +149,14 @@ const MainApp = () => {
       case 'field_workspace':
         return (
           <TaskWorkspacePage
+            key={selectedTicketId}
             ticketId={selectedTicketId}
             onBack={() => navigateTo('technician_dashboard')}
           />
         );
 
       case 'parts_request':
+        return <PartsRequestsPage onOpenWorkspace={handleOpenWorkspace} />;
       case 'inventory_dashboard':
       case 'inventory_items':
       case 'item_requests':
@@ -158,12 +168,12 @@ const MainApp = () => {
         return activeRoleId === 'dept_admin' ? (
           <DeptReportsPage />
         ) : (
-          <AnalyticsDashboard />
+          <AnalyticsDashboard onNavigate={navigateTo} onSelectTicket={handleSelectTicket} />
         );
 
       // Super Admin Views
       case 'superadmin_dashboard':
-        return <AnalyticsDashboard />;
+        return <AnalyticsDashboard onNavigate={navigateTo} onSelectTicket={handleSelectTicket} />;
 
       case 'users':
         return <UserManagementPage />;
@@ -203,6 +213,8 @@ const MainApp = () => {
       onSelectTicket={handleSelectTicket}
     >
       {renderCurrentView()}
+      {assignTicket && <AssignTechnicianModal key={assignTicket.id} isOpen ticket={tickets.find((ticket) => ticket.id === assignTicket.id)} onClose={() => setAssignTicket(null)} />}
+      {reviewTicket && <ReviewTicketDrawer key={reviewTicket.id} isOpen ticket={tickets.find((ticket) => ticket.id === reviewTicket.id)} onClose={() => setReviewTicket(null)} onAssignAfterApprove={(ticket) => setAssignTicket(ticket)} />}
     </AppLayout>
   );
 };
@@ -212,11 +224,17 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <TicketProvider>
-            <InventoryProvider>
-              <MainApp />
-            </InventoryProvider>
-          </TicketProvider>
+          <SettingsProvider>
+            <TicketProvider>
+              <InventoryProvider>
+                <LocationProvider>
+                  <NotificationProvider>
+                    <MainApp />
+                  </NotificationProvider>
+                </LocationProvider>
+              </InventoryProvider>
+            </TicketProvider>
+          </SettingsProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

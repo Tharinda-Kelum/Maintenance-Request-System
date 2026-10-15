@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Bell, CheckCircle2, Clock, Wrench, Package, Shield, ArrowRight, Check } from 'lucide-react';
-import { INITIAL_NOTIFICATIONS } from '../../data/adminData';
+import { useNotifications } from '../../context/NotificationContext';
 import { useToast } from '../../context/ToastContext';
 
 export const NotificationsPage = ({ onSelectTicket }) => {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const { notifications, markAllAsRead: markRead, toggleRead } = useNotifications();
   const [activeCategory, setActiveCategory] = useState('All');
   const { showToast } = useToast();
 
@@ -15,14 +15,8 @@ export const NotificationsPage = ({ onSelectTicket }) => {
   );
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    markRead();
     showToast('All notifications marked as read', 'info');
-  };
-
-  const toggleRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, unread: !n.unread } : n))
-    );
   };
 
   const categoryIcons = {
@@ -34,7 +28,7 @@ export const NotificationsPage = ({ onSelectTicket }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-150">
+    <div className="notifications-page max-w-4xl mx-auto space-y-6 animate-in fade-in duration-150">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#131926] p-6 rounded-2xl border border-[#1F293D] shadow-card">
         <div>
@@ -104,7 +98,7 @@ export const NotificationsPage = ({ onSelectTicket }) => {
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-bold text-white">{item.title}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#0E131E] border border-[#1F293D] text-slate-300 font-medium">
                         {item.category}
@@ -114,7 +108,7 @@ export const NotificationsPage = ({ onSelectTicket }) => {
                       )}
                     </div>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">{item.message}</p>
-                    <div className="text-[11px] text-slate-400 mt-2 font-mono flex items-center gap-2">
+                    <div className="text-[11px] text-slate-400 mt-2 font-mono flex flex-wrap items-center gap-2">
                       <span>{item.timestamp}</span>
                       {item.ticketId && (
                         <>

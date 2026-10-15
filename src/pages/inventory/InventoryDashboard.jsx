@@ -4,12 +4,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Plus,
-  ArrowUpRight,
   TrendingDown,
   Search,
   ShoppingCart,
-  History,
   Check,
   X
 } from 'lucide-react';
@@ -51,6 +48,7 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
   const [showPOModal, setShowPOModal] = useState(false);
   const [selectedPOItem, setSelectedPOItem] = useState(null);
   const [poQuantity, setPoQuantity] = useState(10);
+  const [poUrgency, setPoUrgency] = useState('High');
 
   // Calculations
   const totalItems = inventory.length;
@@ -74,7 +72,8 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
   const handleSubmitPO = (e) => {
     e.preventDefault();
     if (!selectedPOItem) return;
-    raisePurchaseRequest(selectedPOItem.code, poQuantity);
+    if (!Number.isInteger(poQuantity) || poQuantity < 1 || poQuantity > 500) return;
+    raisePurchaseRequest(selectedPOItem.code, poQuantity, poUrgency);
     setShowPOModal(false);
   };
 
@@ -103,7 +102,7 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#020617] bg-[#bbf246] hover:bg-[#a3e635] rounded-full shadow-[0_0_16px_rgba(187,242,70,0.4)] transition-colors"
           >
             <ShoppingCart className="w-4 h-4 stroke-[2.5]" />
-            <span>Raise Purchase Requisition</span>
+            <span>Request stock</span>
           </button>
         </div>
       </div>
@@ -360,6 +359,7 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
                           </button>
                           <button
                             onClick={() => rejectItemRequest(req.id, 'Insufficient stock')}
+                            aria-label={`Reject parts request ${req.ticketId}`}
                             className="px-2.5 py-1.5 border border-[#1F293D] hover:bg-white/10 text-slate-400 rounded-full transition-colors"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -443,15 +443,17 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
                 Cancel
               </button>
               <button
-                onClick={handleSubmitPO}
+                type="submit"
+                form="purchase-request"
                 className="px-5 py-2 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full shadow-sm"
               >
-                Generate PO to Bursar
+                Save purchase request
               </button>
             </>
           }
         >
-          <form onSubmit={handleSubmitPO} className="space-y-4 text-xs">
+          <form id="purchase-request" onSubmit={handleSubmitPO} className="space-y-4 text-xs">
+            <label className="block">Stock item<select className="w-full mt-2 p-2.5 rounded-xl border border-[#1F293D]" value={selectedPOItem.code} onChange={(event) => setSelectedPOItem(inventory.find((item) => item.code === event.target.value))}>{inventory.map((item) => <option key={item.id} value={item.code}>{item.name}</option>)}</select></label>
             <div className="p-3 bg-[#0E131E] border border-[#1F293D] rounded-xl space-y-1">
               <div className="flex justify-between">
                 <span className="text-slate-400">Current Stock:</span>
@@ -485,10 +487,10 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
               <label className="block font-semibold text-slate-200 mb-1.5">
                 Purchase Urgency
               </label>
-              <select className="w-full p-2.5 bg-[#0E131E] border border-[#1F293D] rounded-xl outline-none text-white focus:border-[#a3e635]">
-                <option className="bg-[#0E131E] text-white">Urgent - Facility Disruption</option>
-                <option className="bg-[#0E131E] text-white">High - Approaching Zero Stock</option>
-                <option className="bg-[#0E131E] text-white">Routine Semester Restock</option>
+              <select value={poUrgency} onChange={(event) => setPoUrgency(event.target.value)} className="w-full p-2.5 bg-[#0E131E] border border-[#1F293D] rounded-xl outline-none text-white focus:border-[#a3e635]">
+                <option value="Urgent" className="bg-[#0E131E] text-white">Urgent - Facility Disruption</option>
+                <option value="High" className="bg-[#0E131E] text-white">High - Approaching Zero Stock</option>
+                <option value="Routine" className="bg-[#0E131E] text-white">Routine Semester Restock</option>
               </select>
             </div>
           </form>

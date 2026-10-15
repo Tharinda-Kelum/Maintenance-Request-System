@@ -30,12 +30,17 @@ export const AppLayout = ({
     return () => window.removeEventListener('keydown', handleKeyboardShortcut);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    document.getElementById('main-content')?.focus({ preventScroll: true });
+  }, [activeTab]);
+
   return (
     <div
       className={`min-h-screen text-[var(--text-primary)] flex flex-col font-sans selection:bg-[var(--accent)] selection:text-[var(--accent-text)] ${isDark ? 'dark' : 'light'}`}
       style={{ backgroundColor: 'var(--bg-base)' }}
     >
-      {/* Top Floating Pill Navigation */}
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <TopNav
         activeTab={activeTab}
         onSelectTab={onSelectTab}
@@ -58,7 +63,7 @@ export const AppLayout = ({
         )}
 
         {/* Dynamic Main Workspace Content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-[1600px] w-full mx-auto">
+        <main id="main-content" tabIndex={-1} className="app-main flex-1 p-4 sm:p-6 md:p-8 max-w-[1440px] w-full mx-auto min-w-0">
           {children}
         </main>
       </div>

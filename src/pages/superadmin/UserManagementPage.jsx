@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Plus, Search, Filter, Shield, CheckCircle2, XCircle, MoreVertical, Edit2, Key } from 'lucide-react';
+import { Plus, Search, Key } from 'lucide-react';
 import { INITIAL_USERS } from '../../data/adminData';
 import { Modal } from '../../components/common/Modal';
 import { useToast } from '../../context/ToastContext';
@@ -40,7 +40,7 @@ export const UserManagementPage = () => {
   };
 
   const handleResetPassword = (name) => {
-    showToast(`Password reset link dispatched to ${name}'s university email`, 'success');
+    window.location.assign(`mailto:maintenance@vau.ac.lk?subject=${encodeURIComponent(`Password reset request: ${name}`)}`);
   };
 
   const handleCreateUser = (e) => {
@@ -170,7 +170,7 @@ export const UserManagementPage = () => {
                     <button
                       onClick={() => handleResetPassword(user.name)}
                       className="p-1 text-slate-400 hover:text-brand-blue rounded"
-                      title="Dispatch Password Reset"
+                      title="Request password reset by email"
                     >
                       <Key className="w-4 h-4" />
                     </button>
@@ -208,7 +208,8 @@ export const UserManagementPage = () => {
                 Cancel
               </button>
               <button
-                onClick={handleCreateUser}
+                type="submit"
+                form="add-directory-user"
                 className="px-5 py-2 bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold rounded-lg shadow-sm"
               >
                 Create Account
@@ -216,7 +217,7 @@ export const UserManagementPage = () => {
             </>
           }
         >
-          <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
+          <form id="add-directory-user" onSubmit={handleCreateUser} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-brand-text mb-1">Full Name & Title</label>
               <input

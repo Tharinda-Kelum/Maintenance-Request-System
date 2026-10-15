@@ -4,11 +4,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
-  Play,
-  ArrowRight,
   MapPin,
-  FileText,
-  User,
   Package
 } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
@@ -24,18 +20,14 @@ export const TechnicianDashboard = ({ onOpenWorkspace, onSelectTicket }) => {
 
   const myTasks = tickets.filter(
     (t) =>
-      (t.assignedTo && (t.assignedTo.name === currentUser.name || t.assignedTo.trade?.includes('Electrical') || t.assignedTo.trade?.includes('HVAC'))) ||
-      t.status === 'Assigned' ||
-      t.status === 'In Progress' ||
-      t.status === 'Inspection' ||
-      t.status === 'Awaiting Parts'
+      t.assignedTo?.name === currentUser.name
   );
 
   const assignedCount = myTasks.filter((t) => t.status === 'Assigned').length;
   const inProgressCount = myTasks.filter((t) => t.status === 'In Progress' || t.status === 'Inspection').length;
   const awaitingPartsCount = myTasks.filter((t) => t.status === 'Awaiting Parts').length;
   const highPriorityCount = myTasks.filter((t) => (t.priority === 'High' || t.priority === 'Urgent') && t.status !== 'Resolved').length;
-  const completedTodayCount = myTasks.filter((t) => t.status === 'Resolved' || t.status === 'Repair Completed').length;
+  const completedTodayCount = myTasks.filter((t) => ['Resolved', 'Repair Completed', 'Completed'].includes(t.status)).length;
 
   const tabs = [
     { label: 'All', count: myTasks.length },
@@ -167,7 +159,7 @@ export const TechnicianDashboard = ({ onOpenWorkspace, onSelectTicket }) => {
                     {task.category.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-[#a3e635]">
                         {task.id}
                       </span>
@@ -202,7 +194,7 @@ export const TechnicianDashboard = ({ onOpenWorkspace, onSelectTicket }) => {
                     className="px-4 py-2 text-xs font-extrabold rounded-full bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] shadow-[0_0_16px_rgba(187,242,70,0.4)] transition-all inline-flex items-center gap-1.5"
                   >
                     <Wrench className="w-3.5 h-3.5 stroke-[2.5]" />
-                    <span>Open Field Workspace</span>
+                    <span>Open task</span>
                   </button>
                 </div>
               </div>

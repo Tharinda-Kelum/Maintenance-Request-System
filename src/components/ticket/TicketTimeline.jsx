@@ -1,17 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Clock, AlertCircle, CircleDot } from 'lucide-react';
 
-const WORKFLOW_STEPS = [
-  "Submitted",
-  "Department Review",
-  "Approved",
-  "Assigned",
-  "Inspection",
-  "In Progress",
-  "Repair Completed",
-  "Resolved"
-];
-
 export const TicketTimeline = ({ timeline = [], currentStatus = "Submitted" }) => {
   const isRejected = currentStatus === "Rejected";
 

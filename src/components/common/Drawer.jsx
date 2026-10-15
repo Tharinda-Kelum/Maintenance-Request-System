@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 export const Drawer = ({
   isOpen,
@@ -10,15 +11,7 @@ export const Drawer = ({
   width = 'max-w-xl',
   footer
 }) => {
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const dialogRef = useDialogFocus(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -34,6 +27,10 @@ export const Drawer = ({
         <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
           <div
             className={`pointer-events-auto w-screen ${width} bg-[#131926] text-white shadow-2xl border-l border-[#1F293D] flex flex-col transform transition ease-in-out duration-200`}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
           >
             {/* Header */}
             <div className="px-6 py-4 border-b border-[#1F293D] flex items-center justify-between bg-[#0E131E]">
@@ -43,6 +40,7 @@ export const Drawer = ({
               </div>
               <button
                 onClick={onClose}
+                aria-label="Close panel"
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
               >
                 <X className="w-5 h-5" />

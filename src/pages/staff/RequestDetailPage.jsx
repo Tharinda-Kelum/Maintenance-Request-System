@@ -1,41 +1,29 @@
 import React, { useState } from 'react';
 import {
   ArrowLeft,
-  Calendar,
-  Clock,
-  MapPin,
-  User,
   Phone,
   Wrench,
   CheckCircle2,
-  AlertTriangle,
-  FileText,
-  Building2,
-  Share2,
-  Printer,
-  ShieldCheck,
-  Send,
-  XOctagon
+  Printer
 } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { isOwnRequest, nextStep } from '../../utils/requestHelpers';
 import { StatusBadge, PriorityBadge } from '../../components/common/Badge';
 import { TicketTimeline } from '../../components/ticket/TicketTimeline';
 import { TicketActivityFeed } from '../../components/ticket/TicketActivityFeed';
-import { AttachmentGallery, SLAIndicator } from '../../components/ticket/AttachmentGallery';
+import { AttachmentGallery } from '../../components/ticket/AttachmentGallery';
 import { Modal } from '../../components/common/Modal';
 
 export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview }) => {
   const { tickets, confirmResolution } = useTickets();
   const { currentUser, activeRoleId } = useAuth();
-  const { showToast } = useToast();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(5);
   const [feedbackNotes, setFeedbackNotes] = useState('');
 
-  const ticket = tickets.find((t) => t.id === ticketId) || tickets[0];
+  const ticket = tickets.find((t) => t.id === ticketId && (activeRoleId !== 'general_user' || isOwnRequest(t, currentUser)));
 
   if (!ticket) {
     return (
@@ -53,7 +41,7 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
   }
 
   const handleSignOff = () => {
-    confirmResolution(ticket.id, currentUser.name);
+    confirmResolution(ticket.id, currentUser.name, { rating: feedbackRating, notes: feedbackNotes.trim() });
     setShowConfirmModal(false);
   };
 
@@ -62,7 +50,8 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-150">
+    <div className="space-y-6 animate-in fade-in duration-150 request-detail">
+      {activeRoleId === 'general_user' && <section className="ui-panel next-step-panel"><span className="eyebrow">WHAT HAPPENS NEXT</span><h2>{nextStep(ticket)}</h2>{ticket.status === 'Repair Completed' && <button className="ui-button primary" onClick={() => setShowConfirmModal(true)}>Confirm the repair is fixed <CheckCircle2 size={18} /></button>}</section>}
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#131926] p-5 rounded-2xl border border-[#1F293D] shadow-card">
         <div className="flex items-center gap-3">
@@ -74,7 +63,7 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-bold text-[#a3e635]">
                 {ticket.id}
               </span>
@@ -152,7 +141,7 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
           <AttachmentGallery attachments={ticket.attachments} />
 
           {/* Maintenance Lifecycle Timeline */}
-          <TicketTimeline timeline={ticket.timeline} currentStatus={ticket.status} />
+          {activeRoleId === 'general_user' ? <details className="ui-panel"><summary className="p-5 cursor-pointer font-semibold text-sm">View full request history ({ticket.timeline.length} updates)</summary><TicketTimeline timeline={ticket.timeline} currentStatus={ticket.status} /></details> : <TicketTimeline timeline={ticket.timeline} currentStatus={ticket.status} />}
 
           {/* Activity Feed & Remarks */}
           <TicketActivityFeed ticket={ticket} />
@@ -163,12 +152,12 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
           {/* Quick Status & SLA Card */}
           <div className="bg-[#131926] rounded-2xl border border-[#1F293D] p-5 shadow-card space-y-4">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Ticket Operations & SLA
+              Request status
             </h4>
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between py-1 border-b border-[#1F293D]">
-                <span className="text-slate-400">Current Lifecycle:</span>
+                <span className="text-slate-400">Current status:</span>
                 <StatusBadge status={ticket.status} size="xs" />
               </div>
               <div className="flex justify-between py-1 border-b border-[#1F293D]">
@@ -176,7 +165,7 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
                 <PriorityBadge priority={ticket.priority} size="xs" />
               </div>
               <div className="flex justify-between py-1 border-b border-[#1F293D]">
-                <span className="text-slate-400">Resolution SLA:</span>
+                <span className="text-slate-400">Response target:</span>
                 <span className="font-mono text-white font-semibold">{ticket.slaDue}</span>
               </div>
               <div className="flex justify-between py-1">
@@ -188,13 +177,13 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
             {/* Contextual Actions by Role */}
             <div className="pt-3 border-t border-[#1F293D] space-y-2">
               {/* If user is requester and status is Repair Completed */}
-              {(ticket.status === 'Repair Completed' || ticket.status === 'In Progress') && (
+              {ticket.status === 'Repair Completed' && isOwnRequest(ticket, currentUser) && (
                 <button
                   onClick={() => setShowConfirmModal(true)}
                   className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-2 shadow-xs"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm Work & Sign Off</span>
+                  <span>Confirm the repair is fixed</span>
                 </button>
               )}
 
@@ -203,17 +192,18 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
                 <div className="space-y-2">
                   <button
                     onClick={() => onOpenAssign && onOpenAssign(ticket)}
+                    disabled={!['Approved', 'Assigned', 'Inspection', 'In Progress', 'Awaiting Parts'].includes(ticket.status)}
                     className="w-full py-2 px-3 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(187,242,70,0.3)]"
                   >
                     <Wrench className="w-3.5 h-3.5" />
                     <span>{ticket.assignedTo ? 'Re-assign Technician' : 'Assign Technician'}</span>
                   </button>
-                  {ticket.status === 'Pending Review' && (
+                  {['Submitted', 'Pending Review'].includes(ticket.status) && (
                     <button
                       onClick={() => onOpenReview && onOpenReview(ticket)}
                       className="w-full py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-full transition-colors"
                     >
-                      Conduct Department Review
+                      Review request
                     </button>
                   )}
                 </div>
@@ -278,6 +268,7 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenAssign, onOpenReview
                   <span className="font-medium text-slate-300">{ticket.department}</span>
                 </div>
               )}
+              {ticket.locationNotes && <div><span className="text-slate-400 block">Location notes</span><span>{ticket.locationNotes}</span></div>}
             </div>
           </div>
 

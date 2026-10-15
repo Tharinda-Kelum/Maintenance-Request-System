@@ -12,7 +12,7 @@ export const ToastProvider = ({ children }) => {
 
   const showToast = useCallback((message, type = 'success', duration = 4000) => {
     const id = Date.now() + Math.random().toString(36).substring(2, 6);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev.slice(-1), { id, message, type }]);
 
     if (duration > 0) {
       setTimeout(() => {
@@ -22,10 +22,10 @@ export const ToastProvider = ({ children }) => {
   }, [removeToast]);
 
   return (
-    <ToastContext.Provider value={{ showToast, removeToast }}>
+    <ToastContext.Provider value={{ showToast, removeToast, clearToasts: () => setToasts([]) }}>
       {children}
       {/* Enterprise Toast Container */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none px-4">
+      <div className="toast-stack fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map((toast) => {
           let bg = 'bg-white border-brand-border text-brand-text';
           let Icon = CheckCircle2;
@@ -49,7 +49,7 @@ export const ToastProvider = ({ children }) => {
             <div
               key={toast.id}
               className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-lg border shadow-modal transition-all animate-in fade-in slide-in-from-bottom-2 duration-200 ${bg}`}
-              role="alert"
+              role={toast.type === 'error' || toast.type === 'danger' ? 'alert' : 'status'}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${iconColor}`} />
               <div className="flex-1 text-xs sm:text-sm font-medium leading-relaxed">

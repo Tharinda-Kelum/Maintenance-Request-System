@@ -21,16 +21,20 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 
 export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
   const { currentUser, activeRoleId, activeRoleConfig, logout } = useAuth();
   const { tickets } = useTickets();
   const { itemRequests, inventory } = useInventory();
+  const { unreadCount } = useNotifications();
+  const dialogRef = useDialogFocus(true, onToggleCollapse);
 
   // Badge counts
-  const pendingReviewCount = tickets.filter((t) => t.status === 'Pending Review' || t.status === 'Submitted').length;
-  const technicianTasksCount = tickets.filter((t) => t.status === 'In Progress' || t.status === 'Assigned' || t.status === 'Inspection').length;
+  const pendingReviewCount = tickets.filter((t) => t.department === currentUser.department && ['Pending Review', 'Submitted'].includes(t.status)).length;
+  const technicianTasksCount = tickets.filter((t) => t.assignedTo?.name === currentUser.name && ['In Progress', 'Assigned', 'Inspection', 'Awaiting Parts'].includes(t.status)).length;
   const pendingInventoryCount = itemRequests.filter((r) => r.status === 'Pending').length;
   const lowStockCount = inventory.filter((i) => i.status === 'Low Stock' || i.status === 'Out of Stock').length;
 
@@ -52,7 +56,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
           {
             title: 'GENERAL',
             items: [
-              { id: 'notifications', label: 'Notifications', icon: Bell, badge: 2 },
+              { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadCount },
               { id: 'locations', label: 'Department Rooms', icon: Building2 }
             ]
           }
@@ -128,10 +132,10 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
           {
             title: 'PORTAL',
             items: [
-              { id: 'staff_dashboard', label: 'Overview', icon: LayoutDashboard },
+              { id: 'staff_dashboard', label: 'Home', icon: LayoutDashboard },
               { id: 'my_requests', label: 'My Requests', icon: FileText },
               { id: 'create_request', label: '+ New Request', icon: CheckSquare, highlight: true },
-              { id: 'notifications', label: 'Notifications', icon: Bell, badge: 1 }
+              { id: 'notifications', label: 'Updates', icon: Bell, badge: unreadCount }
             ]
           },
           {
@@ -154,7 +158,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
         onClick={onToggleCollapse}
       />
 
-      <aside className="relative z-50 w-72 h-full bg-[#0D111A] text-slate-200 border-r border-[#1F293D] flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
+      <aside ref={dialogRef} role="dialog" aria-modal="true" aria-label="All pages" className="relative z-50 w-80 max-w-[90vw] h-full bg-[#0D111A] text-slate-200 border-r border-[#1F293D] flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
         {/* Header */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-[#1F293D] bg-[#0A0D15]">
           <div className="flex items-center gap-3">
@@ -174,6 +178,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
           </div>
           <button
             onClick={onToggleCollapse}
+            aria-label="Close navigation menu"
             className="p-1 rounded-lg text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
@@ -206,6 +211,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
                   return (
                     <button
                       key={item.id}
+                      aria-current={isActive ? 'page' : undefined}
                       onClick={() => onSelectTab(item.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                         isActive
@@ -238,7 +244,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-[#1F293D] bg-[#0A0D15] flex items-center justify-between">
-          <div
+          <button
             onClick={() => onSelectTab('profile')}
             className="flex items-center gap-2.5 cursor-pointer min-w-0"
           >
@@ -249,7 +255,7 @@ export const Sidebar = ({ activeTab, onSelectTab, onToggleCollapse }) => {
               <p className="text-xs font-bold text-white truncate">{currentUser.name}</p>
               <p className="text-[10px] text-slate-400 truncate">{currentUser.roleName || currentUser.role}</p>
             </div>
-          </div>
+          </button>
           <button
             onClick={logout}
             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/5"

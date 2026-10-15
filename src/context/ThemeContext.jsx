@@ -5,7 +5,7 @@ const ThemeContext = createContext(null);
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('mrs-theme');
-    return saved ? saved === 'dark' : true; // default dark
+    return saved ? saved === 'dark' : false;
   });
 
   useLayoutEffect(() => {

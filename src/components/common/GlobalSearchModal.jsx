@@ -3,17 +3,24 @@ import { Search, FileText, Package, X, ArrowRight } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
 import { TECHNICIANS_DIRECTORY } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
+import { canAccessTab } from '../../auth/accessControl';
+import { visibleRequests } from '../../utils/requestHelpers';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate }) => {
   const [query, setQuery] = useState('');
   const { tickets } = useTickets();
   const { inventory } = useInventory();
+  const { currentUser, activeRoleId } = useAuth();
+  const dialogRef = useDialogFocus(isOpen, onClose);
+  const inventoryTab = canAccessTab(activeRoleId, 'inventory_items') ? 'inventory_items' : canAccessTab(activeRoleId, 'parts_request') ? 'parts_request' : null;
 
   const results = useMemo(() => {
     if (!query.trim()) return { tickets: [], inventory: [], technicians: [] };
     const q = query.toLowerCase();
 
-    const matchedTickets = tickets.filter(
+    const matchedTickets = visibleRequests(tickets, currentUser, activeRoleId).filter(
       (t) =>
         t.id.toLowerCase().includes(q) ||
         t.title.toLowerCase().includes(q) ||
@@ -22,14 +29,14 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
         t.category.toLowerCase().includes(q)
     ).slice(0, 4);
 
-    const matchedInventory = inventory.filter(
+    const matchedInventory = (inventoryTab ? inventory : []).filter(
       (i) =>
         i.code.toLowerCase().includes(q) ||
         i.name.toLowerCase().includes(q) ||
         i.category.toLowerCase().includes(q)
     ).slice(0, 3);
 
-    const matchedTechs = TECHNICIANS_DIRECTORY.filter(
+    const matchedTechs = (canAccessTab(activeRoleId, 'technicians') ? TECHNICIANS_DIRECTORY : []).filter(
       (tech) =>
         tech.name.toLowerCase().includes(q) ||
         tech.trade.toLowerCase().includes(q)
@@ -40,7 +47,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
       inventory: matchedInventory,
       technicians: matchedTechs
     };
-  }, [query, tickets, inventory]);
+  }, [query, tickets, inventory, currentUser, activeRoleId, inventoryTab]);
 
   if (!isOpen) return null;
 
@@ -54,7 +61,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-2xl bg-[#131926] rounded-2xl shadow-modal border border-[#1F293D] overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Search" className="relative w-full max-w-2xl bg-[#131926] rounded-2xl shadow-modal border border-[#1F293D] overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-150">
         {/* Search Input */}
         <div className="flex items-center px-4 border-b border-[#1F293D] bg-[#0E131E]">
           <Search className="w-5 h-5 text-lime-bright mr-3 flex-shrink-0" />
@@ -77,6 +84,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
           <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-[#1F293D] rounded border border-slate-700">
             ESC
           </kbd>
+          <button className="icon-button ml-2" onClick={onClose} aria-label="Close search"><X size={18} /></button>
         </div>
 
         {/* Results Body */}
@@ -92,6 +100,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
             </div>
           ) : (
             <div className="space-y-4">
+              {results.technicians.length > 0 && <div><h3 className="text-sm font-semibold mb-2">Technicians</h3>{results.technicians.map((technician) => <button className="request-row" key={technician.id} onClick={() => { onNavigate('technicians'); onClose(); }}><span className="request-row-main">{technician.name}<small className="block text-slate-400">{technician.trade}</small></span><ArrowRight size={17} /></button>)}</div>}
               {results.tickets.length > 0 && (
                 <div>
                   <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">
@@ -101,6 +110,9 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
                     {results.tickets.map((t) => (
                       <div
                         key={t.id}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectTicket(t.id); onClose(); } }}
                         onClick={() => {
                           onSelectTicket(t.id);
                           onClose();
@@ -141,8 +153,11 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
                     {results.inventory.map((item) => (
                       <div
                         key={item.id}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onNavigate?.(inventoryTab); onClose(); } }}
                         onClick={() => {
-                          onNavigate?.('inventory_items');
+                          onNavigate?.(inventoryTab);
                           onClose();
                         }}
                         className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-[#1F293D]"

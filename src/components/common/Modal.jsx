@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 export const Modal = ({
   isOpen,
@@ -10,15 +11,7 @@ export const Modal = ({
   maxWidth = 'max-w-xl',
   footer
 }) => {
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const dialogRef = useDialogFocus(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -34,6 +27,8 @@ export const Modal = ({
       <div
         className={`relative bg-[#131926] text-white rounded-2xl border border-[#1F293D] shadow-2xl w-full ${maxWidth} z-10 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150 my-8`}
         role="dialog"
+        ref={dialogRef}
+        aria-label={title}
         aria-modal="true"
       >
         {/* Header */}
@@ -44,6 +39,7 @@ export const Modal = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
           >
             <X className="w-5 h-5" />

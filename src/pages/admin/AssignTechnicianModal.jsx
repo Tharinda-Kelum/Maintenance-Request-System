@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Modal } from '../../components/common/Modal';
-import { Wrench, Phone, CheckCircle2, Star, AlertCircle } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useAuth } from '../../context/AuthContext';
 
 export const AssignTechnicianModal = ({ isOpen, onClose, ticket }) => {
-  const { technicians, assignTechnician } = useTickets();
+  const { technicians, tickets, assignTechnician } = useTickets();
   const { currentUser } = useAuth();
   const [selectedTechId, setSelectedTechId] = useState(ticket?.assignedTo?.id || 'tech-01');
 
@@ -49,13 +48,16 @@ export const AssignTechnicianModal = ({ isOpen, onClose, ticket }) => {
         <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
           {technicians.map((tech) => {
             const isSelected = selectedTechId === tech.id;
-            const workloadPercent = Math.min(100, Math.round((tech.activeJobs / 5) * 100));
+            const activeJobs = tickets.filter((item) => item.assignedTo?.id === tech.id && !['Resolved', 'Completed', 'Rejected', 'Repair Completed'].includes(item.status)).length;
+            const workloadPercent = Math.min(100, Math.round((activeJobs / 5) * 100));
 
             return (
-              <div
+              <button
                 key={tech.id}
+                type="button"
+                aria-pressed={isSelected}
                 onClick={() => setSelectedTechId(tech.id)}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`block w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all ${
                   isSelected
                     ? 'border-[#bbf246] bg-[#bbf246]/15 ring-2 ring-[#bbf246]/40 shadow-[0_0_16px_rgba(187,242,70,0.2)]'
                     : 'border-[#1F293D] bg-[#0E131E] hover:border-slate-600 hover:bg-[#182132]'
@@ -90,7 +92,7 @@ export const AssignTechnicianModal = ({ isOpen, onClose, ticket }) => {
 
                   <div className="text-right">
                     <span className="text-xs font-bold text-white font-mono">
-                      {tech.activeJobs} active jobs
+                      {activeJobs} active jobs
                     </span>
                     {/* Workload Mini Bar */}
                     <div className="w-24 h-1.5 bg-[#1F293D] rounded-full mt-1.5 overflow-hidden">
@@ -121,7 +123,7 @@ export const AssignTechnicianModal = ({ isOpen, onClose, ticket }) => {
                     ))}
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>

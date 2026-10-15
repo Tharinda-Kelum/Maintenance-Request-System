@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { INITIAL_INVENTORY_ITEMS, INITIAL_ITEM_REQUESTS, INITIAL_TRANSACTIONS } from '../data/inventoryData';
 import { useToast } from './ToastContext';
+import { useTickets } from './TicketContext';
 
 const InventoryContext = createContext(null);
 
@@ -9,10 +10,18 @@ export const InventoryProvider = ({ children }) => {
   const [itemRequests, setItemRequests] = useState(INITIAL_ITEM_REQUESTS);
   const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
   const { showToast } = useToast();
+  const { updatePartRequest } = useTickets();
+
+  const createItemRequest = (ticket, item, quantity, urgency, technician) => {
+    if (!Number.isInteger(quantity) || quantity < 1) return null;
+    const request = { id: `REQ-${crypto.randomUUID()}`, ticketId: ticket.id, technician: technician.name, technicianTrade: technician.trade || technician.roleName, itemCode: item.code, itemName: item.name, quantity, unit: item.unit, urgency, requestedAt: new Date().toLocaleString(), status: 'Pending', notes: `For ${ticket.room}` };
+    setItemRequests((previous) => [request, ...previous]);
+    return request;
+  };
 
   const approveAndIssueItem = (requestId, storeKeeperName = "M. Fernando") => {
     const req = itemRequests.find((r) => r.id === requestId);
-    if (!req) return;
+    if (!req || req.status !== 'Pending') return;
 
     // Check stock
     const item = inventory.find((i) => i.code === req.itemCode);
@@ -53,22 +62,32 @@ export const InventoryProvider = ({ children }) => {
     };
 
     setTransactions((prev) => [newTxn, ...prev]);
+    updatePartRequest(req.ticketId, req.id, 'Issued');
     showToast(`Issued ${req.quantity} ${req.unit} of ${item.name} for ticket ${req.ticketId}`, 'success');
   };
 
   const rejectItemRequest = (requestId, reason = "Item not in current stock") => {
+    const request = itemRequests.find((item) => item.id === requestId);
+    if (!request || request.status !== 'Pending') return;
     setItemRequests((prev) =>
       prev.map((r) => (r.id === requestId ? { ...r, status: `Rejected: ${reason}` } : r))
     );
+    updatePartRequest(request.ticketId, request.id, 'Rejected');
     showToast("Item requisition rejected", 'warning');
   };
 
   const raisePurchaseRequest = (itemCode, requestedQty, urgency = "High") => {
     const item = inventory.find((i) => i.code === itemCode);
-    showToast(`Purchase requisition raised for ${requestedQty} units of ${item ? item.name : itemCode}. Forwarded to Bursar.`, 'info');
+    if (!item || !Number.isInteger(requestedQty) || requestedQty < 1 || requestedQty > 500) return;
+    const id = `PO-${crypto.randomUUID().slice(0, 8)}`;
+    setTransactions((previous) => [{ id, timestamp: new Date().toLocaleString(), type: 'Purchase request', itemCode, itemName: item.name, quantity: requestedQty, issuedTo: 'Central Stores', ticketRef: id, authorizedBy: `Requested · ${urgency}` }, ...previous]);
+    showToast(`Purchase request for ${requestedQty} ${item.unit} of ${item.name} recorded in issue history.`, 'success');
   };
 
   const adjustStock = (itemId, delta, reason = "Physical stock verification") => {
+    const item = inventory.find((entry) => entry.id === itemId);
+    if (!item || !Number.isFinite(delta)) return;
+    const actualDelta = Math.max(0, item.stock + delta) - item.stock;
     setInventory((prev) =>
       prev.map((item) => {
         if (item.id === itemId) {
@@ -79,6 +98,7 @@ export const InventoryProvider = ({ children }) => {
         return item;
       })
     );
+    setTransactions((previous) => [{ id: `ADJ-${crypto.randomUUID().slice(0, 8)}`, timestamp: new Date().toLocaleString(), type: 'Stock adjustment', itemCode: item.code, itemName: item.name, quantity: actualDelta, issuedTo: 'Central Stores', ticketRef: 'Stock count', authorizedBy: reason }, ...previous]);
     showToast("Inventory quantity updated", 'success');
   };
 
@@ -88,6 +108,7 @@ export const InventoryProvider = ({ children }) => {
         inventory,
         itemRequests,
         transactions,
+        createItemRequest,
         approveAndIssueItem,
         rejectItemRequest,
         raisePurchaseRequest,

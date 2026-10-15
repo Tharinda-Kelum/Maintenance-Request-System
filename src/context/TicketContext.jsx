@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { INITIAL_TICKETS, TECHNICIANS_DIRECTORY } from '../data/mockData';
 import { useToast } from './ToastContext';
+import { useSettings } from './SettingsContext';
 
 const TicketContext = createContext(null);
 
@@ -8,6 +9,7 @@ export const TicketProvider = ({ children }) => {
   const [tickets, setTickets] = useState(INITIAL_TICKETS);
   const [technicians, setTechnicians] = useState(TECHNICIANS_DIRECTORY);
   const { showToast } = useToast();
+  const { settings } = useSettings();
 
   const getTicketById = useCallback((id) => {
     return tickets.find((t) => t.id === id);
@@ -15,8 +17,9 @@ export const TicketProvider = ({ children }) => {
 
   // Create new ticket
   const createTicket = (ticketData, currentUser) => {
-    const ticketSeq = String(tickets.length + 149).padStart(4, '0');
-    const newId = `MRS-2026-${ticketSeq}`;
+    const year = new Date().getFullYear();
+    const ticketSeq = String(Math.max(0, ...tickets.filter((ticket) => ticket.id.startsWith(`MRS-${year}-`)).map((ticket) => Number(ticket.id.split('-').at(-1)) || 0)) + 1).padStart(4, '0');
+    const newId = `MRS-${year}-${ticketSeq}`;
     const timestamp = new Date().toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
@@ -32,6 +35,7 @@ export const TicketProvider = ({ children }) => {
       building: ticketData.building,
       floor: ticketData.floor,
       room: ticketData.room,
+      locationNotes: ticketData.locationNotes || '',
       priority: ticketData.priority,
       status: "Submitted",
       requester: {
@@ -43,7 +47,7 @@ export const TicketProvider = ({ children }) => {
       assignedTo: null,
       submittedAt: timestamp,
       lastUpdated: timestamp,
-      slaDue: ticketData.priority === 'Urgent' ? '4 hours' : ticketData.priority === 'High' ? '12 hours' : '24 hours',
+      slaDue: `${settings.responseHours[ticketData.priority] || 24} hours`,
       description: ticketData.description,
       attachments: ticketData.attachments || [],
       timeline: [
@@ -81,6 +85,7 @@ export const TicketProvider = ({ children }) => {
             ...t,
             status: "Approved",
             priority: priority || t.priority,
+            slaDue: `${settings.responseHours[priority || t.priority] || 24} hours`,
             lastUpdated: timestamp,
             timeline: [
               ...t.timeline,
@@ -256,6 +261,10 @@ export const TicketProvider = ({ children }) => {
   };
 
   // Technician: Submit Work Report & mark completed
+  const updatePartRequest = (ticketId, requestId, status) => {
+    setTickets((previous) => previous.map((ticket) => ticket.id === ticketId ? { ...ticket, itemRequests: (ticket.itemRequests || []).map((item) => item.id === requestId ? { ...item, status } : item) } : ticket));
+  };
+
   const submitWorkReport = (ticketId, reportNotes, technicianName) => {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toISOString().slice(0, 10);
     setTickets((prev) =>
@@ -283,14 +292,15 @@ export const TicketProvider = ({ children }) => {
   };
 
   // Staff Member: Confirm resolution
-  const confirmResolution = (ticketId, staffName) => {
+  const confirmResolution = (ticketId, staffName, feedback) => {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toISOString().slice(0, 10);
     setTickets((prev) =>
       prev.map((t) => {
-        if (t.id === ticketId) {
+        if (t.id === ticketId && t.status === 'Repair Completed') {
           return {
             ...t,
             status: "Resolved",
+            feedback: feedback || null,
             lastUpdated: timestamp,
             timeline: [
               ...t.timeline,
@@ -310,15 +320,16 @@ export const TicketProvider = ({ children }) => {
   };
 
   // Add Comment
-  const addComment = (ticketId, text, author) => {
-    if (!text.trim()) return;
+  const addComment = (ticketId, text, author, attachments = []) => {
+    if (!text.trim() && !attachments.length) return;
     const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', Today';
     const newComment = {
       id: `c-${Date.now()}`,
       author: author.name,
       role: author.roleName || author.role,
       time: timestamp,
-      text: text.trim()
+      text: text.trim() || `Added ${attachments.length} attachment(s).`,
+      attachments
     };
 
     setTickets((prev) =>
@@ -327,6 +338,7 @@ export const TicketProvider = ({ children }) => {
           return {
             ...t,
             comments: [...(t.comments || []), newComment],
+            attachments: [...(t.attachments || []), ...attachments],
             lastUpdated: timestamp
           };
         }
@@ -350,6 +362,7 @@ export const TicketProvider = ({ children }) => {
         updateDiagnosis,
         toggleChecklistItem,
         requestParts,
+        updatePartRequest,
         submitWorkReport,
         confirmResolution,
         addComment

@@ -31,3 +31,10 @@ export const authenticate = async ({ username, password }) => {
     roleId: role.id
   };
 };
+
+export const changeDemoPassword = async (username, currentPassword, newPassword) => {
+  await authenticate({ username, password: currentPassword });
+  if (newPassword.length < 8) throw new Error('Use at least 8 characters for your new password.');
+  const account = DEMO_ACCOUNTS.find((item) => item.username === username);
+  account.password = newPassword;
+};

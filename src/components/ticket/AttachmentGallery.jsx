@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Image, FileText, Download, Eye, X } from 'lucide-react';
+import { Image, Download, Eye, X } from 'lucide-react';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 export const AttachmentGallery = ({ attachments = [] }) => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const dialogRef = useDialogFocus(Boolean(selectedImage), () => setSelectedImage(null));
 
   if (!attachments || attachments.length === 0) {
     return (
@@ -48,26 +50,30 @@ export const AttachmentGallery = ({ attachments = [] }) => {
       {/* Lightbox Preview */}
       {selectedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative max-w-2xl w-full bg-[#131926] rounded-2xl overflow-hidden shadow-2xl border border-[#1F293D]">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Preview ${selectedImage.name}`} className="relative max-w-2xl w-full bg-[#131926] rounded-2xl overflow-hidden shadow-2xl border border-[#1F293D]">
             <div className="px-4 py-3 border-b border-[#1F293D] flex items-center justify-between bg-[#0E131E]">
               <div className="text-xs font-semibold text-white truncate">
                 {selectedImage.name} ({selectedImage.size})
               </div>
               <button
                 onClick={() => setSelectedImage(null)}
+                aria-label="Close attachment preview"
                 className="p-1 rounded text-slate-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-8 flex flex-col items-center justify-center bg-[#0B0F17] text-white min-h-[300px]">
+            <div className="p-6 flex flex-col items-center justify-center bg-[#0B0F17] text-white min-h-[300px]">
+              {selectedImage.url ? (selectedImage.type?.startsWith('image/') ? <img src={selectedImage.url} alt={selectedImage.name} className="max-h-[60vh] max-w-full object-contain" /> : <iframe title={selectedImage.name} src={selectedImage.url} className="w-full h-[55vh]" />) : <>
               <div className="w-20 h-20 rounded-2xl bg-[#131926] flex items-center justify-center mb-4 text-[#a3e635] border border-[#1F293D]">
                 <Image className="w-10 h-10" />
               </div>
               <p className="text-sm font-medium text-white">{selectedImage.name}</p>
-              <p className="text-xs text-slate-400 mt-1">Simulated high-resolution photo evidence capture</p>
+              <p className="text-xs text-slate-400 mt-1">This sample attachment has no file content.</p>
+              </>}
             </div>
             <div className="px-4 py-2.5 bg-[#0E131E] border-t border-[#1F293D] flex justify-end">
+              {selectedImage.url && <a href={selectedImage.url} download={selectedImage.name} className="ui-button secondary mr-3"><Download size={16} /> Download</a>}
               <button
                 onClick={() => setSelectedImage(null)}
                 className="px-4 py-1.5 text-xs font-semibold bg-[#1F293D] hover:bg-slate-700 rounded-full text-slate-200"

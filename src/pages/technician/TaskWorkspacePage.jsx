@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 import {
   ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Wrench,
   Package,
-  UploadCloud,
-  FileText,
-  AlertTriangle,
   Phone,
-  Send,
-  Plus,
-  X
+  Plus
 } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
@@ -22,11 +14,11 @@ import { Modal } from '../../components/common/Modal';
 
 export const TaskWorkspacePage = ({ ticketId, onBack }) => {
   const { tickets, updateDiagnosis, toggleChecklistItem, requestParts, submitWorkReport, updateTicketStatus } = useTickets();
-  const { inventory } = useInventory();
+  const { inventory, createItemRequest } = useInventory();
   const { currentUser } = useAuth();
   const { showToast } = useToast();
 
-  const ticket = tickets.find((t) => t.id === ticketId) || tickets[0];
+  const ticket = tickets.find((t) => t.id === ticketId && t.assignedTo?.name === currentUser.name);
 
   // Workspace form state
   const [diagnosis, setDiagnosis] = useState(ticket?.diagnosisNotes || '');
@@ -55,9 +47,12 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
   const handleRequestPartSubmit = (e) => {
     e.preventDefault();
     const item = inventory.find((i) => i.code === selectedItemCode);
-    if (!item) return;
+    if (!item || !Number.isInteger(requestedQuantity) || requestedQuantity < 1) return;
+    const request = createItemRequest(ticket, item, requestedQuantity, partUrgency, currentUser);
+    if (!request) return;
 
     requestParts(ticket.id, {
+      id: request.id,
       itemId: item.id,
       name: item.name,
       quantity: requestedQuantity,
@@ -70,6 +65,8 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
   };
 
   const handleFinishRepair = () => {
+    if (!['In Progress', 'Awaiting Parts'].includes(ticket.status)) return;
+    if (!reportSummary.trim()) { showToast('Add a short work report before marking the repair complete.', 'warning'); return; }
     submitWorkReport(ticket.id, reportSummary, currentUser.name);
   };
 
@@ -88,12 +85,13 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
+            aria-label="Back to my tasks"
             className="p-2 rounded-full text-slate-400 hover:text-white bg-[#0E131E] border border-[#1F293D] hover:bg-[#1A2234] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-bold text-[#a3e635]">{ticket.id}</span>
               <StatusBadge status={ticket.status} />
               <PriorityBadge priority={ticket.priority} />
@@ -285,6 +283,7 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
         <textarea
           rows={3}
           value={reportSummary}
+          aria-label="Repair work report"
           onChange={(e) => setReportSummary(e.target.value)}
           placeholder="e.g. Replaced 45uF motor capacitor, charged 1.2kg R410A refrigerant. Tested cooling for 45 minutes; air output steady at 16°C. Work area cleaned."
           className="w-full p-3.5 text-xs text-white bg-[#0E131E] border border-[#1F293D] rounded-xl outline-none focus:border-[#a3e635]"
@@ -296,9 +295,10 @@ export const TaskWorkspacePage = ({ ticketId, onBack }) => {
           </span>
           <button
             onClick={handleFinishRepair}
+            disabled={!['In Progress', 'Awaiting Parts'].includes(ticket.status) || !reportSummary.trim()}
             className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-sm transition-colors"
           >
-            Submit Work Report & Mark Resolved
+            Send report & finish repair
           </button>
         </div>
       </div>

@@ -25,7 +25,8 @@ export const StatusBadge = ({ status, size = 'sm' }) => {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-semibold rounded-full border shadow-2xs ${style} ${sizeClasses} transition-all`}
+      data-status={status}
+      className={`status-badge inline-flex items-center gap-1.5 font-semibold rounded-full border shadow-2xs ${style} ${sizeClasses} transition-all`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current" />
       <span>{status}</span>
@@ -51,7 +52,8 @@ export const PriorityBadge = ({ priority, size = 'sm' }) => {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-semibold rounded-full border ${style} ${sizeClasses}`}
+      data-priority={priority}
+      className={`priority-badge inline-flex items-center gap-1.5 font-semibold rounded-full border ${style} ${sizeClasses}`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current" />
       <span>{priority}</span>

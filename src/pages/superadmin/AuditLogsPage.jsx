@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { AlertOctagon, Search, Download, Filter, Shield } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { INITIAL_AUDIT_LOGS } from '../../data/adminData';
-import { useToast } from '../../context/ToastContext';
+import { downloadCSV } from '../../utils/downloadCSV';
 
 export const AuditLogsPage = () => {
-  const [logs, setLogs] = useState(INITIAL_AUDIT_LOGS);
+  const [logs] = useState(INITIAL_AUDIT_LOGS);
   const [searchQuery, setSearchQuery] = useState('');
   const [moduleFilter, setModuleFilter] = useState('All');
-  const { showToast } = useToast();
 
   const filteredLogs = logs.filter((log) => {
     if (moduleFilter !== 'All' && log.module !== moduleFilter) return false;
@@ -16,6 +15,7 @@ export const AuditLogsPage = () => {
       return (
         log.user.toLowerCase().includes(q) ||
         log.action.toLowerCase().includes(q) ||
+        log.ip?.toLowerCase().includes(q) ||
         log.target.toLowerCase().includes(q) ||
         log.details.toLowerCase().includes(q)
       );
@@ -24,7 +24,7 @@ export const AuditLogsPage = () => {
   });
 
   const handleExport = () => {
-    showToast('Exporting security audit logs in encrypted format...', 'info');
+    downloadCSV([['Log ID', 'Time', 'User', 'Action', 'Module', 'Target', 'Details'], ...filteredLogs.map((log) => [log.id, log.timestamp, log.user, log.action, log.module, log.target, log.details])], 'maintenance-audit.csv');
   };
 
   return (

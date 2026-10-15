@@ -12,7 +12,6 @@ export const StatusDonut = ({ data }) => {
   const segments = data || defaultSegments;
   const total = segments.reduce((sum, s) => sum + s.value, 0);
 
-  let cumulativeAngle = 0;
   const size = 180;
   const strokeWidth = 26;
   const radius = (size - strokeWidth) / 2;
@@ -24,9 +23,8 @@ export const StatusDonut = ({ data }) => {
       <div className="relative flex items-center justify-center flex-shrink-0">
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
           {segments.map((seg, i) => {
-            const strokeDasharray = `${(seg.value / total) * circumference} ${circumference}`;
-            const strokeDashoffset = -cumulativeAngle;
-            cumulativeAngle += (seg.value / total) * circumference;
+            const strokeDasharray = `${(seg.value / (total || 1)) * circumference} ${circumference}`;
+            const strokeDashoffset = -segments.slice(0, i).reduce((sum, item) => sum + item.value, 0) / (total || 1) * circumference;
 
             return (
               <circle
@@ -56,7 +54,7 @@ export const StatusDonut = ({ data }) => {
       {/* Legend */}
       <div className="w-full space-y-2.5">
         {segments.map((seg, i) => {
-          const percent = Math.round((seg.value / total) * 100);
+          const percent = Math.round((seg.value / (total || 1)) * 100);
           return (
             <div key={i} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
