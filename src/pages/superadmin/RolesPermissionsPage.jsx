@@ -1,111 +1,21 @@
 import React from 'react';
-import { Shield, Check, X, Info } from 'lucide-react';
-import { PERMISSION_MATRIX } from '../../data/adminData';
+import { Check, Minus } from 'lucide-react';
+import { ROLE_CONFIGS } from '../../auth/roles';
 
-export const RolesPermissionsPage = () => {
-  return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-150">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-card border border-brand-border shadow-xs">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-text">
-            Roles & Permissions Matrix
-          </h1>
-          <p className="text-xs text-brand-text-secondary mt-0.5">
-            Role-based access control (RBAC) governing capabilities across university staff, department heads, field technicians, store keepers, and administrators.
-          </p>
-        </div>
-      </div>
-
-      {/* Info Notice */}
-      <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900 flex items-start gap-3">
-        <Info className="w-5 h-5 flex-shrink-0 text-brand-blue mt-0.5" />
-        <div className="leading-relaxed">
-          <strong>Institutional Governance Policy:</strong> Capabilities are enforced strictly based on user roles linked to university appointments. Super Admins may adjust matrix thresholds or delegate department privileges to Faculty Deans.
-        </div>
-      </div>
-
-      {/* Permissions Matrix Table */}
-      <div className="bg-white rounded-card border border-brand-border shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-brand-border text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-5">System Capability / Operational Module</th>
-                <th className="py-3.5 px-4 text-center">General Staff</th>
-                <th className="py-3.5 px-4 text-center">Dept Admin (HOD)</th>
-                <th className="py-3.5 px-4 text-center">Technician</th>
-                <th className="py-3.5 px-4 text-center">Store Keeper</th>
-                <th className="py-3.5 px-4 text-center">Super Admin</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand-border/70">
-              {PERMISSION_MATRIX.map((row, idx) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3.5 px-5 font-semibold text-brand-text">
-                    {row.module}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {row.staff ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {row.deptAdmin ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {row.technician ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {row.storeKeeper ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {row.superAdmin ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
+const capabilities = [
+  ['Submit a request', ['general_user']],
+  ['HOD approval', ['dept_admin']],
+  ['Dean approval', ['dean']],
+  ['Choose a supervisor', ['maintenance_head']],
+  ['Assign an inspection technician', ['supervisor']],
+  ['Submit an inspection report', ['technician']],
+  ['Arrange materials and work', ['supervisor']],
+  ['Complete work and report actual usage', ['technician']],
+  ['Check, rate, and close completed work', ['supervisor']],
+  ['Request maintenance parts', ['technician', 'supervisor']],
+  ['Issue and manage stock', ['store_keeper', 'maintenance_head', 'super_admin']],
+  ['Manage permitted user accounts', ['dept_admin', 'dean', 'maintenance_head', 'supervisor', 'super_admin']],
+  ['Manage locations and portal settings', ['super_admin']],
+  ['Read account notifications', Object.keys(ROLE_CONFIGS)]
+];
+export const RolesPermissionsPage = () => <div className="portal-page"><div className="page-heading"><div><p className="eyebrow">WHO DOES WHAT</p><h1>Roles & access</h1><p>Each person sees the actions needed for their stage. The server checks permissions and request ownership.</p></div></div><p className="form-hint">HODs work within their department; Deans work within their faculty. Supervisors and technicians work on their assigned requests. Account managers can create only the roles they are permitted to manage.</p><section className="ui-panel overflow-x-auto"><table className="w-full text-sm text-left"><thead><tr><th className="p-4 border-b border-[var(--border)] min-w-[220px]">Action</th>{Object.entries(ROLE_CONFIGS).map(([id, role]) => <th key={id} className="p-4 text-center border-b border-[var(--border)] min-w-[120px]">{role.label}</th>)}</tr></thead><tbody>{capabilities.map(([label, roles]) => <tr key={label}><th className="p-4 font-medium border-b border-[var(--border)]">{label}</th>{Object.keys(ROLE_CONFIGS).map((id) => <td key={id} className="p-4 text-center border-b border-[var(--border)]"><span className="inline-flex" aria-label={roles.includes(id) ? 'Allowed' : 'Not allowed'}>{roles.includes(id) ? <Check size={18} className="text-emerald-600" /> : <Minus size={18} className="text-slate-400" />}</span></td>)}</tr>)}</tbody></table></section></div>;

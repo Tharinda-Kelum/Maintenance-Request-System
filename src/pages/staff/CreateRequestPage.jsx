@@ -22,6 +22,7 @@ export const CreateRequestPage = ({ onNavigate, onSelectTicket }) => {
   const [error, setError] = useState('');
   const [readingFiles, setReadingFiles] = useState(false);
   const [submitted, setSubmitted] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef(null);
   const submittingRef = useRef(false);
   const currentFaculty = CAMPUS_LOCATIONS.find((item) => item.faculty === location.faculty);
@@ -57,17 +58,21 @@ export const CreateRequestPage = ({ onNavigate, onSelectTicket }) => {
     setStep(nextStep);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!details.title.trim() || !details.description.trim() || !details.category) { setError('Add a title, category, and description to continue.'); setStep(0); return; }
     if (step < 2) { moveTo(step + 1); return; }
     if (readingFiles || submittingRef.current) return;
     submittingRef.current = true;
-    const ticket = createTicket({ ...details, title: details.title.trim(), description: details.description.trim(), ...location, attachments }, currentUser);
-    setSubmitted(ticket);
+    setIsSubmitting(true); setError('');
+    try {
+      const ticket = await createTicket({ ...details, title: details.title.trim(), description: details.description.trim(), ...location, attachments });
+      setSubmitted(ticket);
+    } catch (failure) { setError(failure.message); }
+    finally { submittingRef.current = false; setIsSubmitting(false); }
   };
 
-  if (submitted) return <div className="portal-page form-page"><section className="ui-panel success-panel"><CheckCircle2 size={52} /><p className="eyebrow">REQUEST SENT</p><h1>We have received your request</h1><p>Your department will review it and arrange the next step. You can follow updates in My requests.</p><div className="confirmation-reference"><span>Your request number</span><strong>{submitted.id}</strong><span>{submitted.title}</span></div><div className="button-group"><button className="ui-button primary" onClick={() => onSelectTicket(submitted.id)}>Track my request <ArrowRight size={17} /></button><button className="ui-button secondary" onClick={() => onNavigate('my_requests')}>All my requests</button></div></section></div>;
+  if (submitted) return <div className="portal-page form-page"><section className="ui-panel success-panel"><CheckCircle2 size={52} /><p className="eyebrow">REQUEST SENT</p><h1>We have received your request</h1><p>Your HOD will review it first, followed by the Dean and maintenance team. You can follow updates in My requests.</p><div className="confirmation-reference"><span>Your request number</span><strong>{submitted.id}</strong><span>{submitted.title}</span></div><div className="button-group"><button className="ui-button primary" onClick={() => onSelectTicket(submitted.id)}>Track my request <ArrowRight size={17} /></button><button className="ui-button secondary" onClick={() => onNavigate('my_requests')}>All my requests</button></div></section></div>;
 
   return <div className="portal-page form-page">
     <button className="text-action" onClick={() => onNavigate('my_requests')}><ArrowLeft size={17} /> Back to my requests</button>
@@ -92,7 +97,7 @@ export const CreateRequestPage = ({ onNavigate, onSelectTicket }) => {
         ['room', 'Room / office', currentFloor.rooms],
       ].map(([key, label, options]) => <label key={key} htmlFor={`location-${key}`}>{label} *<select id={`location-${key}`} required value={location[key]} onChange={(event) => changeLocation(key, event.target.value)}>{options.map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><label htmlFor="location-notes">Anything else to help us find it? <span className="muted">(optional)</span><input id="location-notes" value={details.locationNotes} onChange={(event) => updateDetails('locationNotes', event.target.value)} placeholder="e.g. Next to the window, on the left side of the room" /></label><p className="location-preview"><MapPin size={19} /> {location.room}, {location.floor}, {location.building}</p></div>}
       {step === 2 && <div className="review-sections"><section><div className="panel-heading"><h3><ClipboardCheck size={18} /> Problem details</h3><button type="button" className="text-action" onClick={() => moveTo(0)}>Edit</button></div><h3>{details.title}</h3><p>{details.category} · {details.priority} priority</p><p className="whitespace-pre-wrap">{details.description}</p><p>{attachments.length ? `${attachments.length} file(s) attached` : 'No attachments'}</p></section><section><div className="panel-heading"><h3><MapPin size={18} /> Location</h3><button type="button" className="text-action" onClick={() => moveTo(1)}>Edit</button></div><p>{location.room}, {location.floor}, {location.building}</p><p>{location.department}, {location.faculty}</p>{details.locationNotes && <p>{details.locationNotes}</p>}</section><p className="form-hint">Submitted by {currentUser.name} · {currentUser.email}</p></div>}
-      <div className="form-actions"><button type="button" className="ui-button secondary" onClick={() => step ? moveTo(step - 1) : onNavigate('my_requests')}><ArrowLeft size={16} /> {step ? 'Back' : 'Cancel'}</button><button type="submit" className="ui-button primary" disabled={readingFiles}>{step === 2 ? 'Send request' : 'Continue'} <ArrowRight size={17} /></button></div>
+      <div className="form-actions"><button type="button" className="ui-button secondary" onClick={() => step ? moveTo(step - 1) : onNavigate('my_requests')}><ArrowLeft size={16} /> {step ? 'Back' : 'Cancel'}</button><button type="submit" className="ui-button primary" disabled={readingFiles || isSubmitting}>{isSubmitting ? 'Sending…' : step === 2 ? 'Send request' : 'Continue'} <ArrowRight size={17} /></button></div>
     </form>
   </div>;
 };

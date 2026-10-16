@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState } from 'react';
-import { UNIVERSITY_INFO } from '../data/mockData';
+import React, { createContext, useContext } from 'react';
+import { api } from '../api/client';
+import { useApiResource } from '../hooks/useApiResource';
 
 const SettingsContext = createContext(null);
+const defaults = { systemName: 'Campus maintenance', campusHours: '', supportEmail: '', supportExtension: '', responseHours: { Low: 72, Medium: 24, High: 12, Urgent: 4 } };
 export const SettingsProvider = ({ children }) => {
-  const [settings, setSettings] = useState({ systemName: 'Campus maintenance', campusHours: UNIVERSITY_INFO.hours, supportEmail: 'maintenance@vau.ac.lk', supportExtension: '4211', responseHours: { Low: 72, Medium: 24, High: 12, Urgent: 4 } });
-  const saveSettings = (changes) => setSettings((previous) => ({ ...previous, ...changes }));
-  return <SettingsContext.Provider value={{ settings, saveSettings }}>{children}</SettingsContext.Provider>;
+  const resource = useApiResource('/settings', defaults);
+  const saveSettings = async (changes) => { const result = await api('/settings', { method: 'PUT', body: changes }); resource.setData(result.data); };
+  return <SettingsContext.Provider value={{ settings: resource.data, saveSettings, loading: resource.loading, ready: resource.ready, error: resource.error, reload: resource.reload }}>{children}</SettingsContext.Provider>;
 };
 export const useSettings = () => useContext(SettingsContext);

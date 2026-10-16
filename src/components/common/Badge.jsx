@@ -1,4 +1,5 @@
 import React from 'react';
+import { requestGroup } from '../../utils/requestHelpers';
 
 export const StatusBadge = ({ status, size = 'sm' }) => {
   const statusStyles = {
@@ -26,6 +27,7 @@ export const StatusBadge = ({ status, size = 'sm' }) => {
   return (
     <span
       data-status={status}
+      data-kind={requestGroup(status)}
       className={`status-badge inline-flex items-center gap-1.5 font-semibold rounded-full border shadow-2xs ${style} ${sizeClasses} transition-all`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current" />

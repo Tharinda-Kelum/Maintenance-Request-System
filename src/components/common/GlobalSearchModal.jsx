@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Search, FileText, Package, X, ArrowRight } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useInventory } from '../../context/InventoryContext';
-import { TECHNICIANS_DIRECTORY } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { canAccessTab } from '../../auth/accessControl';
 import { visibleRequests } from '../../utils/requestHelpers';
@@ -10,7 +9,7 @@ import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate }) => {
   const [query, setQuery] = useState('');
-  const { tickets } = useTickets();
+  const { tickets, technicians } = useTickets();
   const { inventory } = useInventory();
   const { currentUser, activeRoleId } = useAuth();
   const dialogRef = useDialogFocus(isOpen, onClose);
@@ -36,7 +35,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
         i.category.toLowerCase().includes(q)
     ).slice(0, 3);
 
-    const matchedTechs = (canAccessTab(activeRoleId, 'technicians') ? TECHNICIANS_DIRECTORY : []).filter(
+    const matchedTechs = (canAccessTab(activeRoleId, 'technicians') ? technicians : []).filter(
       (tech) =>
         tech.name.toLowerCase().includes(q) ||
         tech.trade.toLowerCase().includes(q)
@@ -47,7 +46,7 @@ export const GlobalSearchModal = ({ isOpen, onClose, onSelectTicket, onNavigate 
       inventory: matchedInventory,
       technicians: matchedTechs
     };
-  }, [query, tickets, inventory, currentUser, activeRoleId, inventoryTab]);
+  }, [query, tickets, inventory, technicians, currentUser, activeRoleId, inventoryTab]);
 
   if (!isOpen) return null;
 

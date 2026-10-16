@@ -11,6 +11,7 @@ export const TicketActivityFeed = ({ ticket }) => {
   const [attachments, setAttachments] = useState([]);
   const [uploadError, setUploadError] = useState('');
   const [readingFiles, setReadingFiles] = useState(false);
+  const [sending, setSending] = useState(false);
   const inputRef = useRef(null);
   const attachFiles = async (files) => {
     setUploadError('');
@@ -20,12 +21,13 @@ export const TicketActivityFeed = ({ ticket }) => {
     finally { setReadingFiles(false); if (inputRef.current) inputRef.current.value = ''; }
   };
 
-  const handlePostComment = (e) => {
+  const handlePostComment = async (e) => {
     e.preventDefault();
-    if ((!commentText.trim() && !attachments.length) || readingFiles) return;
-    addComment(ticket.id, commentText, currentUser, attachments);
-    setCommentText('');
-    setAttachments([]);
+    if ((!commentText.trim() && !attachments.length) || readingFiles || sending) return;
+    setSending(true); setUploadError('');
+    try { await addComment(ticket.id, commentText, currentUser, attachments); setCommentText(''); setAttachments([]); }
+    catch (error) { setUploadError(error.message); }
+    finally { setSending(false); }
   };
 
   const comments = ticket.comments || [];
@@ -98,11 +100,11 @@ export const TicketActivityFeed = ({ ticket }) => {
             </button>
             <button
               type="submit"
-              disabled={(!commentText.trim() && !attachments.length) || readingFiles}
+              disabled={(!commentText.trim() && !attachments.length) || readingFiles || sending}
               className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[#020617] bg-[#bbf246] hover:bg-[#a3e635] disabled:opacity-40 disabled:hover:bg-[#bbf246] rounded-full transition-all shadow-[0_0_12px_rgba(187,242,70,0.3)]"
             >
               <Send className="w-3 h-3" />
-              <span>Send message</span>
+              <span>{sending ? 'Sending…' : 'Send message'}</span>
             </button>
           </div>
         </div>

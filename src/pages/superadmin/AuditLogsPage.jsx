@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Search, Download } from 'lucide-react';
-import { INITIAL_AUDIT_LOGS } from '../../data/adminData';
+import { useApiResource } from '../../hooks/useApiResource';
 import { downloadCSV } from '../../utils/downloadCSV';
 
 export const AuditLogsPage = () => {
-  const [logs] = useState(INITIAL_AUDIT_LOGS);
+  const { data: logs, loading, error, reload } = useApiResource('/audit-logs', []);
   const [searchQuery, setSearchQuery] = useState('');
   const [moduleFilter, setModuleFilter] = useState('All');
 
@@ -77,6 +77,8 @@ export const AuditLogsPage = () => {
       </div>
 
       {/* Logs Table */}
+      {loading && <p role="status">Loading audit records…</p>}
+      {error && <div className="form-error" role="alert">{error}<button className="text-action ml-3" onClick={reload}>Retry</button></div>}
       <div className="bg-white rounded-card border border-brand-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">

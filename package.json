@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prestart": "npm run build",
+    "start": "node ../backend/server.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "test:ui": "node scripts/ui-smoke.mjs",
+    "test:ui": "node scripts/ui-connected.mjs",
+    "test:api": "node scripts/api-integration.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

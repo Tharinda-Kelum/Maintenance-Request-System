@@ -25,14 +25,14 @@ export const Modal = ({
 
       {/* Modal Dialog */}
       <div
-        className={`relative bg-[#131926] text-white rounded-2xl border border-[#1F293D] shadow-2xl w-full ${maxWidth} z-10 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150 my-8`}
+        className={`relative bg-[#131926] text-white rounded-2xl border border-[#1F293D] shadow-2xl w-full ${maxWidth} z-10 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[calc(100dvh-2rem)]`}
         role="dialog"
         ref={dialogRef}
         aria-label={title}
         aria-modal="true"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#1F293D] flex items-center justify-between bg-[#0E131E]">
+        <div className="px-6 py-4 border-b border-[#1F293D] flex items-center justify-between bg-[#0E131E] shrink-0">
           <div>
             <h3 className="text-base font-bold text-white">{title}</h3>
             {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
@@ -47,11 +47,11 @@ export const Modal = ({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">{children}</div>
+        <div className="px-6 py-5 max-h-[75vh] min-h-0 overflow-y-auto">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-3.5 border-t border-[#1F293D] bg-[#0E131E] flex items-center justify-end gap-3">
+          <div className="px-6 py-3.5 border-t border-[#1F293D] bg-[#0E131E] flex items-center justify-end gap-3 shrink-0">
             {footer}
           </div>
         )}

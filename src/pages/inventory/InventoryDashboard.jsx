@@ -69,11 +69,12 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
     setShowPOModal(true);
   };
 
-  const handleSubmitPO = (e) => {
+  const handleSubmitPO = async (e) => {
     e.preventDefault();
     if (!selectedPOItem) return;
     if (!Number.isInteger(poQuantity) || poQuantity < 1 || poQuantity > 500) return;
-    raisePurchaseRequest(selectedPOItem.code, poQuantity, poUrgency);
+    const result = await raisePurchaseRequest(selectedPOItem.code, poQuantity, poUrgency);
+    if (!result) return;
     setShowPOModal(false);
   };
 

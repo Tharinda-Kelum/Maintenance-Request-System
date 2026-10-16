@@ -1,25 +1,18 @@
 import React from 'react';
-import { Search, Bell, Sun, Moon, Menu, UserCircle, Home, FileText, Plus, CheckSquare, Wrench, Package, BarChart3, Users, ScrollText } from 'lucide-react';
+import { Search, Bell, Sun, Moon, Menu, UserCircle } from 'lucide-react';
+import { primaryNavigation } from './navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSettings } from '../../context/SettingsContext';
 import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 
-const navigation = {
-  general_user: [['staff_dashboard', 'Home', Home], ['my_requests', 'My requests', FileText], ['create_request', 'New request', Plus], ['notifications', 'Updates', Bell]],
-  dept_admin: [['dashboard', 'Overview', Home], ['review_queue', 'Review requests', CheckSquare], ['requests', 'All requests', FileText], ['technicians', 'Technicians', Wrench], ['reports', 'Reports', BarChart3]],
-  technician: [['technician_dashboard', 'My tasks', CheckSquare], ['field_workspace', 'Task workspace', Wrench], ['parts_request', 'Spare parts', Package], ['requests', 'Work orders', FileText]],
-  store_keeper: [['inventory_dashboard', 'Overview', Home], ['inventory_items', 'Stock items', Package], ['item_requests', 'Parts requests', CheckSquare], ['transactions', 'Issue history', ScrollText]],
-  super_admin: [['superadmin_dashboard', 'Overview', Home], ['requests', 'Requests', FileText], ['reports', 'Reports', BarChart3], ['users', 'Users', Users], ['audit_logs', 'Activity logs', ScrollText]],
-};
-
 export const TopNav = ({ activeTab, onSelectTab, onOpenSearch, onToggleSidebar }) => {
   const { currentUser, activeRoleId, activeRoleConfig } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
   const { settings } = useSettings();
-  const links = navigation[activeRoleId] || navigation.general_user;
+  const links = primaryNavigation(activeRoleId);
   const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 
   return (

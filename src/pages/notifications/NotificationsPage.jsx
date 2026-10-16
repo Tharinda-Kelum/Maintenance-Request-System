@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Bell, CheckCircle2, Clock, Wrench, Package, Shield, ArrowRight, Check } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
-import { useToast } from '../../context/ToastContext';
 
 export const NotificationsPage = ({ onSelectTicket }) => {
   const { notifications, markAllAsRead: markRead, toggleRead } = useNotifications();
   const [activeCategory, setActiveCategory] = useState('All');
-  const { showToast } = useToast();
 
   const categories = ['All', 'Requests', 'Assignments', 'Approvals', 'Inventory', 'System'];
 
@@ -16,7 +14,6 @@ export const NotificationsPage = ({ onSelectTicket }) => {
 
   const markAllAsRead = () => {
     markRead();
-    showToast('All notifications marked as read', 'info');
   };
 
   const categoryIcons = {
