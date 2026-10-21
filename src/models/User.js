@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ROLES = ['STAFF', 'HOD', 'DEAN', 'HEAD_OF_MAINTENANCE', 'SUPERVISOR', 'TECHNICIAN', 'STORE_KEEPER', 'SUPER_ADMIN'];
+const ROLES = ['STAFF', 'HOD', 'DEAN', 'HEAD_OF_MAINTENANCE', 'SUPERVISOR', 'TECHNICIAN', 'STORE_KEEPER', 'FINANCE_HEAD', 'SUPER_ADMIN'];
 const schema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, maxlength: 160 },
   username: { type: String, unique: true, sparse: true, lowercase: true, trim: true },

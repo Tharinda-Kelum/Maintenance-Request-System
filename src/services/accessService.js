@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Department = require('../models/Department');
+const PurchaseRequest = require('../models/PurchaseRequest');
 const { fail } = require('../utils/http');
 
 const idOf = (value) => String(value?._id || value || '');
@@ -24,6 +25,7 @@ const ticketScope = async (user) => {
     case 'SUPERVISOR': return { supervisorId: user._id };
     case 'HEAD_OF_MAINTENANCE': return { status: { $in: ['DEAN_APPROVED', 'FORWARDED_TO_SUPERVISOR', 'TECHNICIAN_ASSIGNED', 'INSPECTION_COMPLETED', 'ARRANGEMENTS_IN_PROGRESS', 'TECHNICIAN_COMPLETED', 'COMPLETED'] } };
     case 'STORE_KEEPER': case 'SUPER_ADMIN': return {};
+    case 'FINANCE_HEAD': return { _id: { $in: await PurchaseRequest.find({ ticketId: { $ne: null } }).distinct('ticketId') } };
     default: fail(403, 'This account cannot access maintenance requests.');
   }
 };

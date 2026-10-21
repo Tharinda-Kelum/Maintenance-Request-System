@@ -10,12 +10,15 @@
     "setup": "node scripts/setup-env.js",
     "seed": "node src/seed.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.0.0",
+    "google-auth-library": "^11.3.1",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^8.0.0",
     "multer": "^2.0.0"

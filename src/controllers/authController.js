@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const Department = require('../models/Department');
 const { publicUser, audit } = require('../services/portalService');
@@ -20,6 +21,26 @@ exports.login = async (req, res) => {
     fail(401, 'Invalid username or password.');
   }
   attempts.delete(key);
+  user.lastLogin = new Date();
+  await user.save();
+  const token = issueSession(res, user);
+  res.json({ success: true, token, user: publicUser(user) });
+};
+exports.googleLogin = async (req, res) => {
+  if (!process.env.GOOGLE_CLIENT_ID) fail(503, 'Google sign-in is not configured. Set GOOGLE_CLIENT_ID in the backend environment.');
+  const credential = text(req.body.credential, 'Google credential', 10000);
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  let ticket;
+  try {
+    ticket = await client.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+  } catch (error) {
+    if (error.name === 'GaxiosError') throw error;
+    fail(401, 'Google sign-in could not verify your account. Please try again.');
+  }
+  const identity = ticket.getPayload();
+  if (!identity?.email || identity.email_verified !== true) fail(401, 'Use a Google account with a verified email address.');
+  const user = await User.findOne({ email: identity.email.toLowerCase() }).populate({ path: 'departmentId', populate: { path: 'parentId' } });
+  if (!user || user.isActive === false) fail(401, 'No active project account is linked to this Google email.');
   user.lastLogin = new Date();
   await user.save();
   const token = issueSession(res, user);

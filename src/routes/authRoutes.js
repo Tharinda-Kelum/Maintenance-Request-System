@@ -3,6 +3,7 @@ const controller = require('../controllers/authController');
 const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
 const managers = ['HOD', 'DEAN', 'HEAD_OF_MAINTENANCE', 'SUPERVISOR', 'SUPER_ADMIN'];
 router.post('/login', controller.login);
+router.post('/google', controller.googleLogin);
 router.post('/logout', controller.logout);
 router.use(authenticateToken);
 router.get('/me', controller.me);

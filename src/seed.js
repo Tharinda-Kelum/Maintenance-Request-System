@@ -18,6 +18,8 @@ const seed = async () => {
   }
   const faculty = await ensureDepartment('Faculty of Applied Science');
   const maintenance = await ensureDepartment('Main Maintenance Division');
+  const centralAdministration = await ensureDepartment('Central Administration & Services');
+  const financeBranch = await ensureDepartment('Finance Branch', centralAdministration._id);
   const existingHod = await User.findOne({ email: 'hod.cs@vau.ac.lk' });
   const department = existingHod ? await Department.findById(existingHod.departmentId) : await ensureDepartment('Department of Physical Science', faculty._id);
   const password = await bcrypt.hash(process.env.SEED_PASSWORD || 'Admin@1234', 12);
@@ -26,6 +28,7 @@ const seed = async () => {
     ['deptadmin', 'Head of Department', 'hod.cs@vau.ac.lk', 'HOD', department._id, ''],
     ['dean', 'Faculty Dean', 'dean@vau.ac.lk', 'DEAN', faculty._id, ''],
     ['head', 'Head of Maintenance', 'head.maintenance@vau.ac.lk', 'HEAD_OF_MAINTENANCE', maintenance._id, ''],
+    ['finance', 'Head of Finance', 'finance.head@vau.ac.lk', 'FINANCE_HEAD', financeBranch._id, ''],
     ['supervisor', 'Maintenance Supervisor', 'supervisor@vau.ac.lk', 'SUPERVISOR', maintenance._id, ''],
     ['technician', 'N. Pathmanathan', 'tech.electrical@vau.ac.lk', 'TECHNICIAN', maintenance._id, 'Electrical & HVAC'],
     ['storekeeper', 'M. Fernando', 'stores@vau.ac.lk', 'STORE_KEEPER', maintenance._id, ''],

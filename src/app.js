@@ -39,7 +39,7 @@ if (fs.existsSync(path.join(frontendDirectory, 'index.html'))) {
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
   const status = error.status || (error.code === 11000 ? 409 : error.name === 'ValidationError' || error.name === 'CastError' || error.name === 'MulterError' ? 400 : 500);
-  const message = error.code === 11000 ? 'That username, email, or record already exists.' : error.code === 'LIMIT_FILE_SIZE' ? 'Each attachment must be 15 MB or smaller.' : status < 500 ? error.message : 'The server could not complete this action. Please try again.';
+  const message = error.code === 11000 ? 'That username, email, or record already exists.' : error.code === 'LIMIT_FILE_SIZE' ? 'Each attachment must be 15 MB or smaller.' : status === 503 ? error.message : status < 500 ? error.message : 'The server could not complete this action. Please try again.';
   if (status >= 500) console.error(error);
   res.status(status).json({ success: false, message });
 });
