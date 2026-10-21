@@ -147,7 +147,7 @@ exports.reviewCompletedWork = async (req, res) => {
   if (req.body.confirmed !== true) fail(400, 'Confirm that you checked the completed work and material usage.');
   const current = await read(req.user, req.body.ticketId);
   if (current.status !== 'TECHNICIAN_COMPLETED' || !current.completionReport?.submittedAt) fail(409, 'A technician completion report is required before checking and closing this request.');
-  if (await ItemRequest.exists({ ticketId: current._id, status: { $in: ['PENDING', 'ISSUING'] } })) fail(409, 'There are outstanding parts requests. Issue or reject them before completing this request.');
+  if (await ItemRequest.exists({ ticketId: current._id, status: { $in: ['PENDING', 'ISSUING', 'PURCHASE_REQUESTED'] } })) fail(409, 'There are outstanding parts or purchase requests. Issue or reject them before completing this request.');
   const supervisorReview = { rating, remarks, supervisorId: req.user._id, supervisorName: req.user.name, reviewedAt: new Date() };
   res.json({ success: true, data: await change(req, ['TECHNICIAN_COMPLETED'], 'COMPLETED', { supervisorReview, completionNotes: remarks, completedAt: new Date() }, `Supervisor checked the completed work and rated it ${rating}/5. ${remarks}`) });
 };

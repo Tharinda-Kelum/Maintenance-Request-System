@@ -8,5 +8,6 @@ module.exports = mongoose.model('InventoryItem', new mongoose.Schema({
   location: { type: String, default: 'Central Stores' },
   quantityAvailable: { type: Number, min: 0, default: 0 },
   reorderLevel: { type: Number, min: 0, default: 5 },
-  issuedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ItemRequest' }]
+  issuedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ItemRequest' }],
+  receivedPurchases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseRequest' }]
 }, { timestamps: true }));

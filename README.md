@@ -37,6 +37,7 @@ New seed accounts use `SEED_PASSWORD`, or `Admin@1234` when it is unset. Existin
 | deptadmin | hod.cs@vau.ac.lk | HOD |
 | dean | dean@vau.ac.lk | Dean |
 | head | head.maintenance@vau.ac.lk | Head of Maintenance |
+| finance | finance.head@vau.ac.lk | Head of Finance |
 | supervisor | supervisor@vau.ac.lk | Supervisor |
 | technician | tech.electrical@vau.ac.lk | Technician |
 | storekeeper | stores@vau.ac.lk | Store Keeper |
@@ -44,18 +45,22 @@ New seed accounts use `SEED_PASSWORD`, or `Admin@1234` when it is unset. Existin
 
 ## API
 
-- `/api/auth/login`, `/me`, `/logout`, `/change-password`, `/users`, `/users/create-staff`, `/users/:id`, `/technicians`
+- `/api/auth/login`, `/api/auth/google`, `/api/auth/me`, `/api/auth/logout`, `/api/auth/change-password`, `/api/auth/users`, `/api/auth/users/create-staff`, `/api/auth/users/:id`, `/api/auth/technicians`
 - `/api/workflow/tickets` and `/tickets/:id`
 - `/api/workflow/tickets/hod-review`, `/dean-review`, `/forward-head`, `/assign-tech`, `/inspection-report`, `/fulfill-arrangements`, `/completion-report`, `/supervisor-review`
 - `/api/workflow/tickets/:id/comments`
 - `/api/uploads` and authenticated `/api/files/:id`
-- `/api/inventory`, `/requests`, `/requests/:id/issue`, `/requests/:id/reject`, `/transactions`, `/purchase-requests`, `/:id/adjust`
+- `/api/inventory`, `/api/inventory/requests`, `/api/inventory/requests/:id/issue`, `/api/inventory/requests/:id/reject`, `/api/inventory/transactions`, `/api/inventory/purchase-requests`, `/api/inventory/purchase-requests/:id/approve`, `/api/inventory/purchase-requests/:id/reject`, `/api/inventory/purchase-requests/:id/receive`, `/api/inventory/:id/adjust`
 - `/api/notifications`, `/read-all`, `/:id`
 - `/api/departments`, `/api/locations`, `/api/settings`, `/api/audit-logs`, `/api/health`
 
 Authentication uses an HTTP-only session cookie. Bearer tokens are also supported for API clients and integration tests. Passwords are hashed; changing a password or suspending an account invalidates its existing sessions. Configure a private `JWT_SECRET` and the allowed `FRONTEND_ORIGIN` values in `.env`.
 
-`completion-report` requires `ticketId`, `details`, integer `actualTimeMinutes` (1–600000), and optional `materials` rows `{ itemId, quantity }` (integer 0–500) and `materialNotes`. `supervisor-review` requires `ticketId`, integer `rating` (1–5), nonempty `remarks`, and `confirmed: true`. The assigned supervisor cannot verify a report with outstanding parts requests. The old `fulfill-arrangements` completion flag is rejected; pass `isCompleted: false` to arrange work.
+Google sign-in uses `POST /api/auth/google` with `{ "credential": "<Google ID token>" }`. Configure `GOOGLE_CLIENT_ID` with the Web OAuth client ID from Google Cloud. The verified Google email must already belong to an active project account; Google sign-in does not create accounts or grant roles.
+
+When Stores cannot issue an SR because stock is insufficient, the API creates a linked PR and notifies active Finance Heads. The maintenance request timeline includes the SR/PR status and Finance branch contact. A Finance Head reviews the PR using the approve/reject endpoints; Stores records received goods using `/purchase-requests/:id/receive`, then can issue the SR from inventory. The `finance` seed account is for development only.
+
+`completion-report` requires `ticketId`, `details`, integer `actualTimeMinutes` (1–600000), and optional `materials` rows `{ itemId, quantity }` (integer 0–500) and `materialNotes`. `supervisor-review` requires `ticketId`, integer `rating` (1–5), nonempty `remarks`, and `confirmed: true`. The assigned supervisor cannot verify a report with outstanding parts or purchase requests. The old `fulfill-arrangements` completion flag is rejected; pass `isCompleted: false` to arrange work.
 
 Requests, reports, notifications, accounts, settings, and stock are stored in MongoDB. Uploaded JPG/PNG/PDF files are saved in `uploads/` and served only to authorized users. Keep both MongoDB data and uploads when moving the application. In-app notifications are implemented; email/SMS delivery is not configured.
 
