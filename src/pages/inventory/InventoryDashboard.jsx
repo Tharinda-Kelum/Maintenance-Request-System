@@ -11,7 +11,6 @@ import {
   X
 } from 'lucide-react';
 import { useInventory } from '../../context/InventoryContext';
-import { useAuth } from '../../context/AuthContext';
 import { StatCard } from '../../components/common/StatCard';
 import { Modal } from '../../components/common/Modal';
 
@@ -25,8 +24,6 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
     raisePurchaseRequest,
     adjustStock
   } = useInventory();
-  const { currentUser } = useAuth();
-
   const [localTab, setLocalTab] = useState('items');
   const inventoryViews = {
     items: 'inventory_items',
@@ -49,6 +46,8 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
   const [selectedPOItem, setSelectedPOItem] = useState(null);
   const [poQuantity, setPoQuantity] = useState(10);
   const [poUrgency, setPoUrgency] = useState('High');
+  const [isSubmittingPO, setIsSubmittingPO] = useState(false);
+  const [busyRequestId, setBusyRequestId] = useState('');
 
   // Calculations
   const totalItems = inventory.length;
@@ -71,11 +70,34 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
 
   const handleSubmitPO = async (e) => {
     e.preventDefault();
-    if (!selectedPOItem) return;
-    if (!Number.isInteger(poQuantity) || poQuantity < 1 || poQuantity > 500) return;
-    const result = await raisePurchaseRequest(selectedPOItem.code, poQuantity, poUrgency);
-    if (!result) return;
-    setShowPOModal(false);
+    if (!selectedPOItem || isSubmittingPO || !Number.isInteger(poQuantity) || poQuantity < 1 || poQuantity > 500) return;
+    setIsSubmittingPO(true);
+    try {
+      const result = await raisePurchaseRequest(selectedPOItem.code, poQuantity, poUrgency);
+      if (result) setShowPOModal(false);
+    } finally {
+      setIsSubmittingPO(false);
+    }
+  };
+
+  const handleIssueRequest = async (requestId) => {
+    if (busyRequestId) return;
+    setBusyRequestId(requestId);
+    try {
+      await approveAndIssueItem(requestId);
+    } finally {
+      setBusyRequestId('');
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    if (busyRequestId) return;
+    setBusyRequestId(requestId);
+    try {
+      await rejectItemRequest(requestId, 'Insufficient stock');
+    } finally {
+      setBusyRequestId('');
+    }
   };
 
   return (
@@ -309,6 +331,7 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
                   <tr key={req.id} className="hover:bg-white/5 transition-colors">
                     <td className="py-3.5 px-4 font-mono font-bold text-slate-400 whitespace-nowrap">
                       {req.id}
+                      {req.purchaseRequestId && <span className="block mt-1 text-[10px] text-slate-300">PR {req.purchaseRequestId} · {req.purchaseStatus || 'Status unavailable'}</span>}
                     </td>
                     <td className="py-3.5 px-4 font-mono font-semibold text-[#a3e635] whitespace-nowrap">
                       {req.ticketId}
@@ -352,14 +375,16 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
                       {req.status === 'Pending' ? (
                         <>
                           <button
-                            onClick={() => approveAndIssueItem(req.id, currentUser.name)}
+                            onClick={() => handleIssueRequest(req.id)}
+                            disabled={Boolean(busyRequestId)}
                             className="px-3.5 py-1.5 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] font-extrabold rounded-full transition-colors inline-flex items-center gap-1 shadow-sm"
                           >
                             <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                            <span>Approve & Issue</span>
+                            <span>{busyRequestId === req.id ? 'Processing…' : 'Approve & Issue'}</span>
                           </button>
                           <button
-                            onClick={() => rejectItemRequest(req.id, 'Insufficient stock')}
+                            onClick={() => handleRejectRequest(req.id)}
+                            disabled={Boolean(busyRequestId)}
                             aria-label={`Reject parts request ${req.ticketId}`}
                             className="px-2.5 py-1.5 border border-[#1F293D] hover:bg-white/10 text-slate-400 rounded-full transition-colors"
                           >
@@ -439,6 +464,7 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
             <>
               <button
                 onClick={() => setShowPOModal(false)}
+                disabled={isSubmittingPO}
                 className="px-4 py-2 border border-[#1F293D] text-xs font-semibold text-slate-300 rounded-full hover:bg-white/5"
               >
                 Cancel
@@ -446,9 +472,10 @@ export const InventoryDashboard = ({ activeView = 'inventory_dashboard', onNavig
               <button
                 type="submit"
                 form="purchase-request"
+                disabled={isSubmittingPO}
                 className="px-5 py-2 bg-[#bbf246] hover:bg-[#a3e635] text-[#020617] text-xs font-bold rounded-full shadow-sm"
               >
-                Save purchase request
+                {isSubmittingPO ? 'Saving…' : 'Save purchase request'}
               </button>
             </>
           }

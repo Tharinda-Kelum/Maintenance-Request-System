@@ -6,10 +6,12 @@ export const ROLE_CONFIGS = {
   supervisor: { label: 'Maintenance Supervisor', description: 'Arranges work, checks completion reports, and rates the completed work.' },
   technician: { label: 'Technician', description: 'Inspects problems, completes assigned work, and reports actual time and material usage.' },
   store_keeper: { label: 'Store Keeper', description: 'Manages stock and issues the requested maintenance materials.' },
+  finance_head: { label: 'Head of Finance', description: 'Reviews and approves purchase requests for maintenance materials.' },
   super_admin: { label: 'System Administrator', description: 'Manages accounts, campus information, settings, and audit records.' }
 };
 
 export const BACKEND_ROLES = {
   general_user: 'STAFF', dept_admin: 'HOD', dean: 'DEAN', maintenance_head: 'HEAD_OF_MAINTENANCE',
-  supervisor: 'SUPERVISOR', technician: 'TECHNICIAN', store_keeper: 'STORE_KEEPER', super_admin: 'SUPER_ADMIN'
+  supervisor: 'SUPERVISOR', technician: 'TECHNICIAN', store_keeper: 'STORE_KEEPER',
+  finance_head: 'FINANCE_HEAD', super_admin: 'SUPER_ADMIN'
 };

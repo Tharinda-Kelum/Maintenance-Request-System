@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Lock, User, ArrowRight, CheckCircle2, Building, Moon, Sun, AlertCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Lock, User, ArrowRight, CheckCircle2, Building, Moon, Sun, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { UNIVERSITY_INFO } from '../../data/mockData';
@@ -7,15 +7,90 @@ import universityLogo from '../../../University-of-Vavuniya-Logo-1024x1024.png';
 import campusMaintenance from '../../assets/campus-maintenance.png';
 
 export const LoginPage = ({ onLoginSuccess }) => {
-  const { login, connectionError, reconnect } = useAuth();
+  const { login, loginWithGoogle, connectionError, reconnect } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const googleButtonRef = useRef(null);
+  const loginWithGoogleRef = useRef(loginWithGoogle);
+  const onLoginSuccessRef = useRef(onLoginSuccess);
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || '';
+
+  useEffect(() => {
+    loginWithGoogleRef.current = loginWithGoogle;
+    onLoginSuccessRef.current = onLoginSuccess;
+  }, [loginWithGoogle, onLoginSuccess]);
+
+  useEffect(() => {
+    if (!googleClientId) return undefined;
+    let active = true;
+    const buttonContainer = googleButtonRef.current;
+    const script = document.querySelector('script[data-google-identity]');
+    const setupGoogle = () => {
+      if (!active || !window.google?.accounts?.id || !buttonContainer) return;
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async ({ credential }) => {
+          if (isSubmittingRef.current) return;
+          if (!credential) {
+            setError('Google sign-in did not return an ID token. Please try again.');
+            return;
+          }
+          isSubmittingRef.current = true;
+          setIsSubmitting(true);
+          setError('');
+          try {
+            const session = await loginWithGoogleRef.current(credential);
+            onLoginSuccessRef.current?.(session.roleId);
+          } catch (loginError) {
+            setError(loginError.message || 'Unable to sign in with Google. Please try again.');
+          } finally {
+            isSubmittingRef.current = false;
+            setIsSubmitting(false);
+          }
+        }
+      });
+      window.google.accounts.id.renderButton(buttonContainer, {
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        width: Math.min(360, Math.floor(buttonContainer.clientWidth || 360))
+      });
+    };
+    const loadError = () => {
+      if (active) setError('Google sign-in could not load. Check your connection and try again.');
+    };
+    let loadedScript = script;
+    if (!loadedScript) {
+      loadedScript = document.createElement('script');
+      loadedScript.src = 'https://accounts.google.com/gsi/client';
+      loadedScript.async = true;
+      loadedScript.defer = true;
+      loadedScript.dataset.googleIdentity = 'true';
+      document.head.appendChild(loadedScript);
+    }
+    if (window.google?.accounts?.id) setupGoogle();
+    else {
+      loadedScript.addEventListener('load', setupGoogle);
+      loadedScript.addEventListener('error', loadError);
+    }
+    return () => {
+      active = false;
+      loadedScript.removeEventListener('load', setupGoogle);
+      loadedScript.removeEventListener('error', loadError);
+      buttonContainer?.replaceChildren();
+    };
+  }, [googleClientId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setError('');
     setIsSubmitting(true);
 
@@ -25,6 +100,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
     } catch (loginError) {
       setError(loginError.message || 'Unable to sign in. Please try again.');
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -151,14 +227,23 @@ export const LoginPage = ({ onLoginSuccess }) => {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-4 py-2.5 text-xs text-brand-text bg-white border border-brand-border rounded-input outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 transition-all"
+                className="w-full pl-10 pr-11 py-2.5 text-xs text-brand-text bg-white border border-brand-border rounded-input outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-brand-blue"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -185,11 +270,13 @@ export const LoginPage = ({ onLoginSuccess }) => {
             <div className="w-full border-t border-slate-200" />
           </div>
           <span className="relative px-3 bg-[#F7F9FC] text-[11px] text-slate-400 uppercase font-semibold">
-            Institutional Access
+            Institutional or Google Access
           </span>
         </div>
 
-        <p className="text-xs text-center text-slate-400">Use the account provided by your department or system administrator.</p>
+        {googleClientId ? <div ref={googleButtonRef} className={`flex justify-center min-h-10 ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`} aria-busy={isSubmitting} /> : <div className="space-y-2"><button type="button" disabled className="w-full rounded-input border border-brand-border bg-white px-4 py-2.5 text-xs font-semibold text-slate-400 cursor-not-allowed">Continue with Google</button><p className="text-xs text-center text-amber-700" role="status">Google sign-in is unavailable because VITE_GOOGLE_CLIENT_ID is not configured.</p></div>}
+
+        <p className="mt-4 text-xs text-center text-slate-400">Use the account provided by your department or system administrator. Google sign-in requires an existing active project account.</p>
 
         {/* Security Footer Notice */}
         <div className="mt-8 text-center text-[11px] text-slate-400">

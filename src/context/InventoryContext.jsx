@@ -8,7 +8,7 @@ const InventoryContext = createContext(null);
 export const InventoryProvider = ({ children }) => {
   const { activeRoleId } = useAuth();
   const { showToast } = useToast();
-  const canView = ['technician', 'supervisor', 'maintenance_head', 'store_keeper', 'super_admin'].includes(activeRoleId);
+  const canView = ['technician', 'supervisor', 'maintenance_head', 'store_keeper', 'finance_head', 'super_admin'].includes(activeRoleId);
   const canManage = ['store_keeper', 'maintenance_head', 'super_admin'].includes(activeRoleId);
   const inventory = useApiResource('/inventory', [], { enabled: canView, poll: 15000 });
   const requests = useApiResource('/inventory/requests', [], { enabled: canView, poll: 15000 });
@@ -22,6 +22,25 @@ export const InventoryProvider = ({ children }) => {
     if (result) requests.setData((previous) => [result, ...previous]);
     return result;
   };
+  const issueItemRequest = async (id) => {
+    try {
+      const result = await api(`/inventory/requests/${id}/issue`, { method: 'PATCH', body: {} });
+      requests.setData((previous) => previous.map((request) => request.id === result.data.id ? result.data : request));
+      const purchaseReference = result.data.purchaseRequestId ? `PR ${result.data.purchaseRequestId}` : 'A purchase request';
+      showToast(result.data.status === 'Sent to Finance'
+        ? `Stock is unavailable. ${purchaseReference} was sent to Finance for approval.`
+        : 'Parts issued and stock updated.', 'success');
+      return result.data;
+    } catch (error) {
+      showToast(error.message, 'error');
+      return null;
+    }
+  };
+  const updateItemRequest = async (path, body, message) => {
+    const result = await mutate(path, 'PATCH', body, message);
+    if (result) requests.setData((previous) => previous.map((request) => request.id === result.id ? result : request));
+    return result;
+  };
   return <InventoryContext.Provider value={{
     inventory: inventory.data, itemRequests: requests.data, transactions: transactions.data,
     loading: inventory.loading || requests.loading || transactions.loading,
@@ -29,8 +48,8 @@ export const InventoryProvider = ({ children }) => {
     error: inventory.error || requests.error || transactions.error,
     reload: () => Promise.all([inventory.reload(), requests.reload(), transactions.reload()]),
     createItemRequest,
-    approveAndIssueItem: (id) => mutate(`/inventory/requests/${id}/issue`, 'PATCH', {}, 'Parts issued and stock updated.'),
-    rejectItemRequest: (id, reason) => mutate(`/inventory/requests/${id}/reject`, 'PATCH', { reason }, 'Parts request rejected.'),
+    approveAndIssueItem: issueItemRequest,
+    rejectItemRequest: (id, reason) => updateItemRequest(`/inventory/requests/${id}/reject`, { reason }, 'Parts request rejected.'),
     raisePurchaseRequest: (itemCode, quantity, urgency) => mutate('/inventory/purchase-requests', 'POST', { itemCode, quantity, urgency }, 'Purchase request saved.'),
     adjustStock: (id, delta, reason = 'Stock verification') => mutate(`/inventory/${id}/adjust`, 'POST', { delta, reason }, 'Stock updated.')
   }}>{children}</InventoryContext.Provider>;

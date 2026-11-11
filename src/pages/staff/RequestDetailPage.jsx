@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Printer, MapPin, UserRound, ClipboardCheck } from 'lucide-react';
 import { useTickets } from '../../context/TicketContext';
 import { useAuth } from '../../context/AuthContext';
+import { useInventory } from '../../context/InventoryContext';
 import { StatusBadge, PriorityBadge } from '../../components/common/Badge';
 import { WorkflowProgress } from '../../components/ticket/WorkflowProgress';
 import { WorkflowActionModal } from '../../components/ticket/WorkflowActionModal';
@@ -14,11 +15,17 @@ import { nextStep } from '../../utils/requestHelpers';
 
 export const RequestDetailPage = ({ ticketId, onBack, onOpenWorkspace }) => {
   const { tickets } = useTickets();
+  const { itemRequests } = useInventory();
   const { activeRoleId } = useAuth();
   const [showAction, setShowAction] = useState(false);
   const ticket = tickets.find((item) => item.id === ticketId);
   if (!ticket) return <section className="ui-panel friendly-empty"><h1>Request not available</h1><p>This request may have moved to another person or may not be available to your account.</p><button className="ui-button secondary" onClick={onBack}>Back to requests</button></section>;
   const action = actionForTicket(ticket, activeRoleId);
+  const itemRequest = itemRequests.find((request) => request.ticketId === ticket.id);
+  const workflowNote = ticket.partsRequestStatus?.note || '';
+  const notePurchaseRequestId = workflowNote.match(/\bPR\s+([a-f\d]{24})\b/i)?.[1] || '';
+  const financeContact = workflowNote.match(/Finance contact:\s*(.+?)(?:\.\s*$|$)/i)?.[1]?.trim() || '';
+  const linkedPurchaseRequestId = itemRequest?.purchaseRequestId || notePurchaseRequestId;
   return <div className="portal-page request-detail">
     <button className="text-action self-start" onClick={onBack}><ArrowLeft size={17} /> Back to requests</button>
     <div className="page-heading"><div><div className="request-meta"><span>{ticket.id}</span><StatusBadge status={ticket.status} /><PriorityBadge priority={ticket.priority} /></div><h1>{ticket.title}</h1><p>Reported by {ticket.requester.name} · {ticket.submittedAt}</p></div><button className="ui-button secondary" onClick={() => window.print()}><Printer size={17} /> Print request</button></div>
@@ -36,6 +43,18 @@ export const RequestDetailPage = ({ ticketId, onBack, onOpenWorkspace }) => {
       <WorkflowProgress ticket={ticket} />
       <section className="ui-panel help-panel"><h2><MapPin size={19} className="inline mr-2" /> Location</h2><p>{ticket.room}, {ticket.floor}</p><p>{ticket.building}</p><p>{ticket.locationNotes}</p><p>{ticket.department}</p><p>{ticket.faculty}</p></section>
       <section className="ui-panel help-panel"><h2><UserRound size={19} className="inline mr-2" /> Maintenance team</h2><p>Supervisor: <strong>{ticket.supervisor?.name || 'Not yet assigned'}</strong></p><p>Technician: <strong>{ticket.assignedTo?.name || 'Not yet assigned'}</strong></p>{ticket.assignedTo?.phone && <a className="text-action mt-2" href={`tel:${ticket.assignedTo.phone.replace(/[^+\d]/g, '')}`}>{ticket.assignedTo.phone}</a>}</section>
+      {(ticket.partsRequestStatus || itemRequest) && <section className="ui-panel help-panel">
+        <h2>Materials and purchase status</h2>
+        <dl className="inspection-report">
+          <dt>Service Request status</dt><dd>{ticket.status}</dd>
+          <dt>Inventory request status</dt><dd>{itemRequest?.status || ticket.partsRequestStatus?.status || 'Not provided'}</dd>
+          {linkedPurchaseRequestId && <><dt>Linked Purchase Request</dt><dd>{linkedPurchaseRequestId}</dd></>}
+          {itemRequest?.purchaseStatus && <><dt>Purchase Request status</dt><dd>{itemRequest.purchaseStatus}</dd></>}
+          {!itemRequest?.purchaseStatus && ticket.partsRequestStatus && <><dt>Latest purchase workflow update</dt><dd>{ticket.partsRequestStatus.status}</dd></>}
+          {financeContact && <><dt>Finance contact</dt><dd className="whitespace-pre-wrap">{financeContact}</dd></>}
+          {workflowNote && <><dt>Latest backend update</dt><dd className="whitespace-pre-wrap">{workflowNote}</dd></>}
+        </dl>
+      </section>}
     </aside></div>
     {showAction && <WorkflowActionModal ticket={ticket} onClose={() => setShowAction(false)} />}
   </div>;

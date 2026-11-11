@@ -21,6 +21,7 @@ import { TechnicianWorkloadPage } from './pages/admin/TechnicianWorkloadPage';
 import { TaskWorkspacePage } from './pages/technician/TaskWorkspacePage';
 import { PartsRequestsPage } from './pages/technician/PartsRequestsPage';
 import { InventoryDashboard } from './pages/inventory/InventoryDashboard';
+import { PurchaseRequestsPage } from './pages/inventory/PurchaseRequestsPage';
 import { AnalyticsDashboard } from './pages/reports/AnalyticsDashboard';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { UserManagementPage } from './pages/superadmin/UserManagementPage';
@@ -66,6 +67,7 @@ const AccountWorkspace = () => {
       case 'technicians': return <TechnicianWorkloadPage onSelectTicket={selectTicket} />;
       case 'parts_request': return <PartsRequestsPage onOpenWorkspace={auth.activeRoleId === 'technician' ? openWorkspace : selectTicket} />;
       case 'inventory_dashboard': case 'inventory_items': case 'item_requests': case 'transactions': return <InventoryDashboard activeView={activeTab} onNavigate={navigate} />;
+      case 'purchase_requests': return <PurchaseRequestsPage />;
       case 'reports': case 'superadmin_dashboard': return <AnalyticsDashboard onNavigate={navigate} onSelectTicket={selectTicket} />;
       case 'users': return <UserManagementPage />;
       case 'permissions': return <RolesPermissionsPage />;

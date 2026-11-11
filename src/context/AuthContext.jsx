@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { ROLE_CONFIGS } from '../auth/roles';
-import { authenticate, restoreSession } from '../auth/authService';
+import { authenticate, authenticateWithGoogle, restoreSession } from '../auth/authService';
 import { api, setExpectedUser } from '../api/client';
 import { useToast } from './ToastContext';
 
@@ -58,14 +58,15 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = Boolean(currentUser);
   const activeRoleId = currentUser?.role || null;
 
-  const login = async (credentials) => {
-    const session = await authenticate(credentials);
+  const acceptSession = (session) => {
     setCurrentUser(session.user);
     setExpectedUser(session.user);
     announceAccountChange();
     setConnectionError('');
     return session;
   };
+  const login = async (credentials) => acceptSession(await authenticate(credentials));
+  const loginWithGoogle = async (credential) => acceptSession(await authenticateWithGoogle(credential));
 
   const logout = async () => {
     try { await api('/auth/logout', { method: 'POST' }); clearToasts(); setCurrentUser(null); setExpectedUser(null); announceAccountChange(); }
@@ -81,6 +82,7 @@ export const AuthProvider = ({ children }) => {
         isLoading, connectionError, reconnect,
         activeRoleConfig: ROLE_CONFIGS[activeRoleId] || null,
         login,
+        loginWithGoogle,
         changePassword: (currentPassword, newPassword) => api('/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
         logout
       }}

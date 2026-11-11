@@ -85,3 +85,7 @@ API tests start a real backend against a unique temporary MongoDB database. They
 Browser tests start an isolated backend and Vite proxy on available ports, use all eight roles, and verify real form submissions, approvals, inspections, stock issuance, supervisor completion, uploads, messages, persistent sessions, CSV contents, accounts, settings, and desktop/mobile layouts. They require Chrome with remote debugging on port 9222 and a local app page open beside that debugging session.
 
 Both test suites preserve the live application's database and remove only their own temporary test databases. Browser screenshots/downloads are kept in the OS temporary directory. Set `BACKEND_DIR` if the backend is not in the adjacent `../backend` folder.
+
+## Google sign-in
+
+Set `VITE_GOOGLE_CLIENT_ID` in the frontend environment to the Google Web OAuth client ID, and configure the same client ID as `GOOGLE_CLIENT_ID` in the backend environment. The frontend value is a public client identifier, not a private secret. The backend verifies the ID token and only signs in an existing active project account. Restart the Vite server or rebuild after changing frontend environment variables.
